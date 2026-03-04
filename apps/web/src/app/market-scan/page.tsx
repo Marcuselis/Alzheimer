@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
+import { DEFAULT_EXPORT_COLUMNS, EXPORT_COLUMNS, type ExportColumnKey } from '@/lib/trialExport';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -149,6 +150,8 @@ export default function MarketScanPage() {
   const facets = trialsData?.facets || {};
 
   const [sortConfig, setSortConfig] = useState({ key: 'nct_id', direction: 'asc' });
+  const [selectedExportColumns, setSelectedExportColumns] = useState<ExportColumnKey[]>(DEFAULT_EXPORT_COLUMNS);
+  const [isExporting, setIsExporting] = useState(false);
   const NORDIC_COUNTRIES = ['sweden', 'denmark', 'finland', 'norway', 'iceland'];
 
   // --- Helpers ---
@@ -208,6 +211,52 @@ export default function MarketScanPage() {
   };
 
   const handleInputChange = (field: string, value: string) => setSearchParams(prev => ({ ...prev, [field]: value }));
+
+  const toggleExportColumn = (column: ExportColumnKey) => {
+    setSelectedExportColumns((previous) => {
+      if (previous.includes(column)) {
+        if (previous.length === 1) return previous;
+        return previous.filter((item) => item !== column);
+      }
+      return DEFAULT_EXPORT_COLUMNS.filter((item) => previous.includes(item) || item === column);
+    });
+  };
+
+  const handleExportCsv = async () => {
+    if (selectedExportColumns.length === 0) return;
+
+    try {
+      setIsExporting(true);
+
+      const params = new URLSearchParams(queryString);
+      params.set('columns', selectedExportColumns.join(','));
+      params.set('sortKey', sortConfig.key);
+      params.set('sortDirection', sortConfig.direction);
+
+      const response = await fetch(`/api/trials/export?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const contentDisposition = response.headers.get('content-disposition');
+      const match = contentDisposition?.match(/filename="([^"]+)"/i);
+
+      link.href = url;
+      link.download = match?.[1] || `market-scan-results-${sortedTrials.length}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('CSV export failed:', error);
+      window.alert('Failed to export CSV. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="container">
@@ -361,6 +410,55 @@ export default function MarketScanPage() {
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FBFCFD' }}>
           <h2 style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>Results ({totalTrials})</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <details style={{ position: 'relative' }}>
+              <summary
+                className="btn-secondary"
+                style={{ height: '28px', fontSize: '11px', padding: '0 10px', listStyle: 'none', display: 'inline-flex' }}
+              >
+                Columns ({selectedExportColumns.length})
+              </summary>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '32px',
+                  right: 0,
+                  width: '230px',
+                  maxHeight: '280px',
+                  overflowY: 'auto',
+                  padding: '10px',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
+                  zIndex: 20
+                }}
+              >
+                {EXPORT_COLUMNS.map((column) => (
+                  <label
+                    key={column.key}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', cursor: 'pointer' }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedExportColumns.includes(column.key)}
+                      onChange={() => toggleExportColumn(column.key)}
+                    />
+                    <span>{column.label}</span>
+                  </label>
+                ))}
+                <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
+                  At least one column must stay selected.
+                </div>
+              </div>
+            </details>
+            <button
+              onClick={handleExportCsv}
+              className="btn-secondary"
+              disabled={sortedTrials.length === 0 || selectedExportColumns.length === 0 || isExporting}
+              style={{ height: '28px', fontSize: '11px', padding: '0 10px' }}
+            >
+              {isExporting ? 'Exporting...' : 'Export CSV'}
+            </button>
             <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: '500' }}>SORT</span>
             <select
               value={`${sortConfig.key}-${sortConfig.direction}`}
