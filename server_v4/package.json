@@ -1,0 +1,22 @@
+{
+  "name": "nct-lookup-server-v4",
+  "version": "4.0.0",
+  "description": "Backend server for V4 Analyst Workstation - automatic data aggregation from CT.gov, PubMed, and web signals",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["clinical-trials", "alzheimer", "pubmed", "analyst"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "better-sqlite3": "^9.2.2",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

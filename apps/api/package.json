@@ -1,0 +1,37 @@
+{
+  "name": "@app/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/scripts/seed.ts",
+    "db:init-market": "tsx src/scripts/initMarket.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@app/shared": "workspace:*",
+    "@app/workers": "workspace:*",
+    "@fastify/cors": "^8.4.0",
+    "bullmq": "^5.8.0",
+    "fastify": "^4.24.3",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3",
+    "prom-client": "^15.1.0",
+    "redis": "^4.6.11",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.8",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

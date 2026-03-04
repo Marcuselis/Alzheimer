@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+
+# Production
+dist/
+build/
+.next/
+out/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+.env
+.env.local
+.env.*.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Turbo
+.turbo/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# AACT data warehouse
+data/aact/*
+
+# Docker
+docker-compose.override.yml

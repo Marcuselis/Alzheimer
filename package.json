@@ -1,0 +1,29 @@
+{
+  "name": "alzheimer-analyst-workstation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SaaS-feel analyst workstation for Alzheimer's clinical trials intelligence",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:docker": "docker-compose up -d",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:workers": "turbo run dev --filter=workers",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "refresh-data": "npx tsx scripts/refresh_trials.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "turbo": "^1.11.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

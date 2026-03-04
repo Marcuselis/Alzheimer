@@ -1,0 +1,152 @@
+canonical_molecule,phase_from_cummings,cadro_category,mechanism_of_action,nct_ids,lead_sponsor_from_cummings,matched_ctgov_trials_count,matched_sponsors_ctgov,matched_countries_ctgov,nordic_presence,eu_presence
+ACP-204,Phase 3,Neurotransmitter Receptors,Selective antagonist/inverse agonist of 5-hydroxytryptamine (serotonin) receptor subtype 2A,,ACADIA Pharmaceuticals Inc.ACADIA Pharmaceuticals Inc.,1,ACADIA Pharmaceuticals Inc.,Brazil|Bulgaria|Chile|Czechia|France|Italy|Mexico|Serbia|South Korea|Spain|Taiwan|United States,FALSE,TRUE
+AR1001,Phase 3,Synaptic Plasticity/Neuroprotection,PDE-5 inhibitor; improve synaptic plasticity,,"AriBio Co., Ltd.",1,"AriBio Co., Ltd.",Canada|China|Czechia|Denmark|France|Germany|Italy|Netherlands|Poland|South Korea|Spain|United Kingdom|United States,TRUE,TRUE
+Buntanetap,Phase 3,Proteostasis/Proteinopathies,"Inhibits the translation of mRNA of amyloid precursor protein (APP), tau, α-synuclein, and other neurotoxic proteins",,Annovis Bio Inc.,0,,,FALSE,FALSE
+Dextromethorphan + Bupropion,Phase 3,Neurotransmitter Receptors,NMDA receptor antagonist; combination of dextromethorphan and bupropion,,"Axsome Therapeutics, Inc.Axsome Therapeutics, Inc.Axsome Therapeutics, Inc.",0,,,FALSE,FALSE
+Dextromethorphan + Quinidine,Phase 3,Neurotransmitter Receptors,Sigma 1 receptor agonist; NMDA receptor antagonist,,"Otsuka Pharmaceutical Development & Commercialization, Inc.Otsuka Pharmaceutical Development & Commercialization, Inc.Otsuka Pharmaceutical Development & Commercialization, Inc.",0,,,FALSE,FALSE
+Donanemab,Phase 3,Amyloid beta,Monoclonal antibody specific for pyroglutamate form of Aβ,,Eli Lilly and CompanyEli Lilly and CompanyEli Lilly and CompanyEli Lilly and Company,5,Banner Health|Eli Lilly and Company|National Institute on Aging (NIA)|Universidad de Antioquia,Argentina|Australia|Canada|China|Colombia|Czechia|Japan|Netherlands|Poland|Puerto Rico|South Korea|Spain|Taiwan|United Kingdom|United States,FALSE,TRUE
+Donepezil,Phase 3,Neurotransmitter Receptors,Acetylcholinesterase inhibitor,,Assistance Publique - Hôpitaux de Paris,4,"Assistance Publique - Hôpitaux de Paris|Duke University|France Alzheimer|National Institute on Aging (NIA)|Shanghai Jiao Tong University School of Medicine|Wanbangde Pharmaceutical Group Co., LTD",France|United States,FALSE,TRUE
+E2814,Phase 3,Tau,Anti-tau monoclonal antibody,,Washington University School of Medicine,3,"Accelerating Medicines Partnership (AMP)|Alzheimer's Association|Avid Radiopharmaceuticals|Eisai Inc.|Eli Lilly and Company|Hoffmann-La Roche|Janssen, LP|National Institute on Aging (NIA)|Washington University School of Medicine",Argentina|Australia|Brazil|Canada|Colombia|France|Germany|Ireland|Italy|Japan|Mexico|Netherlands|Puerto Rico|Spain|United Kingdom|United States,FALSE,TRUE
+E2814 + Lecanemab,Phase 3,Multi-target,Anti-tau monoclonal antibody plus anti-amyloid monoclonal antibody,,Washington University School of Medicine,0,,,FALSE,FALSE
+Escitalopram,Phase 3,Neurotransmitter Receptors,Selective serotonin reuptake inhibitor,,JHSPH Center for Clinical Trials,1,JHSPH Center for Clinical Trials|National Institute on Aging (NIA),Canada|United States,FALSE,FALSE
+Gantenerumab,Phase 3,Amyloid beta,Monoclonal antibody directed at Aβ plaques and oligomers,,Washington University School of MedicineWashington University School of Medicine,1,"Accelerating Medicines Partnership (AMP)|Alzheimer's Association|Avid Radiopharmaceuticals|Eisai Inc.|Eli Lilly and Company|Hoffmann-La Roche|Janssen, LP|National Institute on Aging (NIA)|Washington University School of Medicine",Argentina|Australia|Brazil|Canada|Colombia|France|Germany|Ireland|Italy|Japan|Netherlands|Puerto Rico|Spain|United Kingdom|United States,FALSE,TRUE
+Gonadorelin,Phase 3,Growth Factors and Hormones,Anti-aging effects,,Nelly Pitteloud,0,,,FALSE,FALSE
+Guanfacine,Phase 3,Neurotransmitter Receptors,Alpha-2 adrenergic agonist,,Imperial College London,1,Imperial College London,United Kingdom,FALSE,FALSE
+Lecanemab,Phase 3,Amyloid beta,Anti-amyloid monoclonal antibody,,Washington University School of MedicineEisai Inc.Eisai Inc.Washington University School of Medicine,8,"Accelerating Medicines Partnership (AMP)|Alzheimer's Association|Alzheimer's Clinical Trials Consortium|Avid Radiopharmaceuticals|Biogen|Bristol-Myers Squibb|Eisai Inc.|Eli Lilly and Company|Hoffmann-La Roche|Janssen, LP|National Institute on Aging (NIA)|Neurology Office of South Florida|Washington University School of Medicine|Zhejiang Provincial People's Hospital",Argentina|Australia|Brazil|Canada|China|Colombia|France|Germany|Ireland|Italy|Japan|Mexico|Netherlands|Puerto Rico|Russia|Singapore|South Korea|Spain|Sweden|United Kingdom|United States,TRUE,TRUE
+Masitinib,Phase 3,Inflammation,Tyrosine kinase inhibitor,,AB Science,1,AB Science,France|Spain,FALSE,TRUE
+Masupirdine,Phase 3,Neurotransmitter Receptors,5-HT6 antagonist,,Suven Life Sciences Limited,1,Suven Life Sciences Limited,Croatia|Poland|Serbia|United States,FALSE,TRUE
+Metformin,Phase 3,Metabolism and Bioenergetics,Insulin sensitizer to improve CNS glucose metabolism,,Columbia University,0,,,FALSE,FALSE
+Nabilone,Phase 3,Neurotransmitter Receptors,Synthetic cannabinoid,,Sunnybrook Health Sciences Centre,1,Alzheimer's Drug Discovery Foundation|Sunnybrook Health Sciences Centre,Canada,FALSE,FALSE
+Nilotinib,Phase 3,Proteostasis/Proteinopathies,Tyrosine kinase inhibitor; autophagy enhancer; promotes clearance of Aβ and tau,,"KeifeRx, LLC",0,,,FALSE,FALSE
+Piromelatine,Phase 3,Neurotransmitter Receptors,Melatonin receptor agonist; 5-HT 1A and 1D serotonin receptor agonist,,Neurim Pharmaceuticals Ltd.,1,Neurim Pharmaceuticals Ltd.|Syneos Health,Canada|United States,FALSE,FALSE
+PM012,Phase 3,Neurogenesis,Upregulation of BDNF,,"Mediforum Ltd., Co.",0,,,FALSE,FALSE
+Remternetug,Phase 3,Amyloid beta,Anti-amyloid monoclonal antibody targeting the pyroglutamate form of A,,Eli Lilly and CompanyWashington University School of MedicineEli Lilly and Company,4,Alzheimer's Association|Eli Lilly and Company|GHR Foundation|National Institute on Aging (NIA)|Private Donors|Washington University School of Medicine,Argentina|Australia|Canada|China|Colombia|France|Germany|Italy|Japan|Mexico|Netherlands|New Zealand|Puerto Rico|South Korea|Spain|Taiwan|United Kingdom|United States,FALSE,TRUE
+Rotigotine + Rivastigmine,Phase 3,Neurotransmitter Receptors,Combined dopamine agonist and cholinesterase inhibition,,I.R.C.C.S. Fondazione Santa Lucia,0,,,FALSE,FALSE
+Semaglutide,Phase 3,Inflammation,GLP-1 agonist; reduces neuroinflammation and improves insulin signaling in the brain,,Novo Nordisk A/SNovo Nordisk A/SNovo Nordisk A/S,5,"Alzheimer's Association|Herlev Hospital|Imperial College London|Novo Nordisk A/S|Rune Skovgaard Rasmussen|Rutgers, The State University of New Jersey",Argentina|Australia|Austria|Belgium|Brazil|Bulgaria|Canada|China|Croatia|Czechia|Denmark|Finland|France|Germany|Greece|Hungary|Ireland|Israel|Italy|Japan|Netherlands|Poland|Portugal|Romania|Russia|Serbia|Slovakia|Slovenia|South Africa|South Korea|Spain|Sweden|Switzerland|Taiwan|Turkey|Ukraine|United Kingdom|United States,TRUE,TRUE
+Simufilam,Phase 3,Synaptic Plasticity/Neuroprotection,Filamin A protein inhibitor; stabilizes amyloid-alpha-7 nicotinic receptor interaction,,"Cassava Sciences, Inc.Cassava Sciences, Inc.",0,,,FALSE,FALSE
+Solanezumab,Phase 3,Amyloid beta,Monoclonal antibody directed at Aβ monomers,,Washington University School of Medicine,1,"Accelerating Medicines Partnership (AMP)|Alzheimer's Association|Avid Radiopharmaceuticals|Eisai Inc.|Eli Lilly and Company|Hoffmann-La Roche|Janssen, LP|National Institute on Aging (NIA)|Washington University School of Medicine",Argentina|Australia|Brazil|Canada|Colombia|France|Germany|Ireland|Italy|Japan|Netherlands|Puerto Rico|Spain|United Kingdom|United States,FALSE,TRUE
+Tertomotide,Phase 3,Amyloid beta,"hTERT peptide vaccine; mimics extra-telomeric functions to inhibit neurotoxicity, apoptosis, and reactive oxygen species",,"Samsung Pharmaceutical Co., Ltd.",0,,,FALSE,FALSE
+Tricaprilin,Phase 3,Metabolism and Bioenergetics,Caprylic triglyceride; induces ketosis and improves mitochondrial and neuronal function,,Cerecin,1,Cerecin,,FALSE,FALSE
+Valiltramiprosate,Phase 3,Amyloid beta,Prodrug of tramiprosate; inhibits Aβ aggregation into toxic oligomers,,Alzheon Inc.,0,,,FALSE,FALSE
+Wujia Yizhi,Phase 3,Inflammation,"Herbal mixture with effects on inflammation, apoptosis, calcium signaling",,"Sichuan Jishengtang Pharmaceutical Co., Ltd.",0,,,FALSE,FALSE
+Xanomeline + Trospium,Phase 3,Neurotransmitter Receptors,Muscarinic cholinergic agonist with peripheral anticholinergic,,Karuna TherapeuticsKaruna TherapeuticsKaruna TherapeuticsKaruna Therapeutics,0,,,FALSE,FALSE
+2-HOBA,Phase 2,Oxidative Stress,Scavenger for reactive carbonyl species,,MTI Biotech Inc,0,,,FALSE,FALSE
+50561,Phase 2,Synaptic Plasticity/Neuroprotection,RAC1 inhibitor (RAC family small GTPase inhibitors) enhance dendritic spine morphogenesis and synaptic plasticity,,Beijing Joekai Biotechnology LLC,0,,,FALSE,FALSE
+ABBV-916,Phase 2,Amyloid beta,Anti-amyloid antibody,,AbbVie,0,,,FALSE,FALSE
+ACI-24.060,Phase 2,Amyloid beta,Vaccine stimulates antibodies against A,,AC Immune SA,0,,,FALSE,FALSE
+ACI-35,Phase 2,Tau,Active immunotherapy targeting tau,,"Janssen Pharmaceutica N.V., Belgium",0,,,FALSE,FALSE
+AL002,Phase 2,Inflammation,Monoclonal antibody targeting TREM2 receptors to promote microglial clearance of Aβ,,Alector Inc.,0,,,FALSE,FALSE
+AL101,Phase 2,Proteostasis/Proteinopathies,Monoclonal antibody to sortilin (SORT1) to improve lysosomal function,,GlaxoSmithKline,0,,,FALSE,FALSE
+Aldesleukin,Phase 2,Inflammation,Restore function of regulatory T cells,,Centre Hospitalier St AnneThe Methodist Hospital Research Institute,0,,,FALSE,FALSE
+ASN51,Phase 2,Tau,O-β-linked N-acetylglucosaminylation (O-GlcNAcylation) modulates tau phosphorylation and aggregation,,Asceneuron S.A.,0,,,FALSE,FALSE
+Astragalus,Phase 2,Multi-target,Traditional Chinese medicine,,Fujian Medical University Union HospitalFujian Medical University Union Hospital,1,Fujian Medical University Union Hospital,China,FALSE,FALSE
+Baricitinib,Phase 2,Inflammation,Janus kinase inhibitor; reduces neuroinflammation,,Massachusetts General Hospital,0,,,FALSE,FALSE
+BCG vaccine,Phase 2,Inflammation,Immunomodulator,,"Steven E Arnold, MD",0,,,FALSE,FALSE
+Benfotiamine,Phase 2,Metabolism and Bioenergetics,Synthetic thiamine to improve neuronal function,,Alzheimer's Disease Cooperative Study (ADCS),0,,,FALSE,FALSE
+Bepranemab,Phase 2,Tau,Anti-tau monoclonal antibody,,UCB Biopharma SRL,0,,,FALSE,FALSE
+BIIB080,Phase 2,Tau,Antisense oligonucleotide targeting tau expression; MAPT RNA inhibitor,,Biogen,1,Biogen,Australia|Belgium|Canada|Czechia|Denmark|Finland|France|Germany|Italy|Japan|Netherlands|Poland|Spain|Sweden|Switzerland|United Kingdom|United States,TRUE,TRUE
+BMS-986446,Phase 2,Tau,Reduces tau spread; directed at epitopes of the microtubule binding region (MTBR),,Bristol-Myers Squibb,1,Bristol-Myers Squibb,Australia|Belgium|Canada|Japan|Singapore|South Korea|Spain|Sweden|United Kingdom|United States,TRUE,TRUE
+Brexanolone,Phase 2,Neurogenesis,Allosteric modulator of GABA-A receptors,,University of Arizona,0,,,FALSE,FALSE
+Brivaracetam,Phase 2,Neurotransmitter Receptors,Anticonvulsant with high affinity for synaptic vesicle protein 2A,,"University of California, Los Angeles",1,"University of California, Los Angeles",United States,FALSE,FALSE
+Bumetanide,Phase 2,"APOE, Lipids and Lipoprotein Receptors",Reversal of APOE-specific AD signatures,,Stanford University,1,Stanford University,United States,FALSE,FALSE
+Cannabidiol,Phase 2,Neurotransmitter Receptors,Cannabinoid with effects on cannabinoid receptors,,"Eastern Virginia Medical SchoolUniversity of Colorado, DenverSunnybrook Health Sciences Centre",1,"University of Colorado, Denver",United States,FALSE,FALSE
+Ciprofloxacin + Celecoxib,Phase 2,Inflammation,"Combined product targeting inflammation, iron accumulation, impaired RNA regulation",,NeuroSense Therapeutics Ltd.,0,,,FALSE,FALSE
+Contraloid acetate,Phase 2,Amyloid beta,Aggregation inhibitor,,PRInnovation GmbH,0,,,FALSE,FALSE
+CORT108297,Phase 2,Growth Factors and Hormones,Selective glucocorticoid receptor antagonist; reduce neuroendocrine stress responses,,Johns Hopkins University,1,Johns Hopkins University|Private Philanthropic Funds,United States,FALSE,FALSE
+CT1812,Phase 2,Synaptic Plasticity/Neuroprotection,Sigma-2 receptor antagonist; competes with oligomeric Aβ binding; protect against Aβ-induced synaptic toxicity,,Cognition Therapeutics,1,Alzheimer's Clinical Trials Consortium|Cognition Therapeutics|National Institute on Aging (NIA),United States,FALSE,FALSE
+DAOIB + AO,Phase 2,Multi-target,NMDA enhancement (DAOIB) + antioxidant,,Chang Gung Memorial Hospital,0,,,FALSE,FALSE
+Dasatinib + Quercetin,Phase 2,Inflammation,Tyrosine kinase inhibitor (dasatinib) and flavonoid (quercetin); senolytic therapy approach to reduce senescent cells and tau aggregation,,Wake Forest University Health SciencesMayo Clinic,0,,,FALSE,FALSE
+Dexmedetomidine,Phase 2,Neurotransmitter Receptors,Sublingual dexmedetomidine; selective α2-adrenergic receptor agonist,,"Teikoku Pharma USA, Inc.",0,,,FALSE,FALSE
+Dimebon,Phase 2,Metabolism and Bioenergetics,Improvement of mitochondrial function,,Bigespas LTD,0,,,FALSE,FALSE
+E2814 + Lecanemab,Phase 2,Multi-target,Anti-tau monoclonal antibody plus anti-amyloid monoclonal antibody,,Eisai Inc.,0,,,FALSE,FALSE
+Edaravone,Phase 2,Oxidative Stress,Pyrazolone free-radical scavenger,,Treeway B.V.,0,,,FALSE,FALSE
+Enrupatinib,Phase 2,Inflammation,Colony stimulating factor 1 receptor (CSF-1R) selective inhibitor to modulate microglia,,Elixiron Immunotherapeutics Limited,0,,,FALSE,FALSE
+EX039,Phase 2,Synaptic Plasticity/Neuroprotection,Inhibits D-amino acids oxidate to increase N-methyl-D-aspartate receptor activity,,Excelsior,1,Excelsior|Formosa Biomedical Technology Corp.,Taiwan,FALSE,FALSE
+Exercised plasma,Phase 2,Synaptic Plasticity/Neuroprotection,Plasma transfusion from exercise-trained donors,,Norwegian University of Science and Technology,0,,,FALSE,FALSE
+Fasudil,Phase 2,Vasculature,Vasodilator,,Helse Stavanger HF,1,"Haraldsplass Deaconess Hospital|Helse Fonna|Helse Stavanger HF|St. Olavs Hospital|University Hospital, Akershus|University of Exeter",Norway,TRUE,FALSE
+Foralumab,Phase 2,Inflammation,Anti-CDR3 antibody,,Brigham and Women's Hospital,0,,,FALSE,FALSE
+IGC-AD1,Phase 2,Neurotransmitter Receptors,Tetrahydrocannabinol that binds to the CB1 receptor,,"IGC Pharma, LLC",0,,,FALSE,FALSE
+Insulin,Phase 2,Metabolism and Bioenergetics,Decrease glucose resistance and increase insulin signaling in the brain,,Wake Forest University Health Sciences,0,,,FALSE,FALSE
+ITI-1284,Phase 2,Neurotransmitter Receptors,"A deuterated form of lumateperone; 5-HT2A receptor antagonist, D1 receptor modulator, D2 receptor modulator",,"Intra-Cellular Therapies, Inc.Intra-Cellular Therapies, Inc.",2,"Intra-Cellular Therapies, Inc.",Bulgaria|Croatia|Czechia|Poland|Romania|Serbia|Slovakia|Spain|United States,FALSE,TRUE
+IVL3003,Phase 2,Neurotransmitter Receptors,Cholinesterase inhibitor,,"Inventage Lab., Inc.",1,"Inventage Lab., Inc.",Australia,FALSE,FALSE
+JNJ-63733657,Phase 2,Tau,Monoclonal antibody targeting soluble tau,,"Janssen Research & Development, LLC",1,"Janssen Research & Development, LLC",Australia|Belgium|Canada|France|Japan|Netherlands|Spain|Sweden|United Kingdom|United States,TRUE,TRUE
+Lecanemab,Phase 2,Amyloid beta,Anti-amyloid monoclonal antibody,,Eisai Inc.,8,"Accelerating Medicines Partnership (AMP)|Alzheimer's Association|Alzheimer's Clinical Trials Consortium|Avid Radiopharmaceuticals|Biogen|Bristol-Myers Squibb|Eisai Inc.|Eli Lilly and Company|Hoffmann-La Roche|Janssen, LP|National Institute on Aging (NIA)|Neurology Office of South Florida|Washington University School of Medicine|Zhejiang Provincial People's Hospital",Argentina|Australia|Brazil|Canada|China|Colombia|France|Germany|Ireland|Italy|Japan|Mexico|Netherlands|Puerto Rico|Russia|Singapore|South Korea|Spain|Sweden|United Kingdom|United States,TRUE,TRUE
+Lemborexant,Phase 2,Multiple,Dual antagonist of orexin OX1 and OX2 receptors with potential effect on A and tau protein,,Washington University School of Medicine,1,Eisai Inc.|National Institute on Aging (NIA)|National Institutes of Health (NIH)|Washington University School of Medicine,United States,FALSE,FALSE
+Lenalidomide,Phase 2,Inflammation,Reduce inflammatory cytokines; modulate innate and adaptive immune responses,,"St. Joseph's Hospital and Medical Center, PhoenixSt. Joseph's Hospital and Medical Center, Phoenix",1,"St. Joseph's Hospital and Medical Center, Phoenix|Texas Tech University",,FALSE,FALSE
+Leuprolide,Phase 2,Growth Factors and Hormones,GnRH receptor agonist; reduce effects of elevated GnRH and gonadotropins on the brain,,Weill Medical College of Cornell University,0,,,FALSE,FALSE
+Levetiracetam,Phase 2,Synaptic Plasticity/Neuroprotection,SV2A modulator; improve synaptic function; reduce Aβ-induced neuronal hyperactivity,,Beth Israel Deaconess Medical CenterWalter Reed National Military Medical CenterAgeneBio,2,Beth Israel Deaconess Medical Center|Fundació Institut de Recerca de l'Hospital de la Santa Creu i Sant Pau|Fundación CITA Alzheimer|Fundación de Investigación Biomédica - Hospital Universitario de La Princesa|Hospital Universitario Marqués de Valdecilla|University Hospital Virgen de las Nieves,Spain|United States,FALSE,TRUE
+LY3372689,Phase 2,Tau,"O-GlycNAcase inhibitor; promote tau glycosylation, prevent tau aggregation",,Eli Lilly and Company,0,,,FALSE,FALSE
+Memantine,Phase 2,Neurotransmitter Receptors,NMDA receptor antagonist,,University of Virginia,3,Bigespas LTD|Duke University|National Institute on Aging (NIA)|University of Virginia,Russia|United States,FALSE,FALSE
+Mevidalen,Phase 2,Neurotransmitter Receptors,DopamineD1 receptor - positive allosteric modulator,,Eli Lilly and Company,1,Eli Lilly and Company,Japan|United States,FALSE,FALSE
+MIB-626,Phase 2,Amyloid beta,Sirtuin-nicotinamide adenine dinucleotide stimulator to enhance alpha-secretase,,Brigham and Women's Hospital,1,Brigham and Women's Hospital,United States,FALSE,FALSE
+MK-1167,Phase 2,Undisclosed,Undisclosed,,Merck Sharp & Dohme LLC,1,Merck Sharp & Dohme LLC,Argentina|Canada|Italy|Japan|Netherlands|South Korea|Spain|United Kingdom|United States,FALSE,TRUE
+Nicotinamide riboside,Phase 2,Metabolism and Bioenergetics,Mitochondrial function enhancer and antioxidant,,Haukeland University Hospital,0,,,FALSE,FALSE
+Nicotine transdermal patch,Phase 2,Neurotransmitter Receptors,Nicotinic acetylcholine receptor agonist,,University of Southern California,0,,,FALSE,FALSE
+Nicotinic Acid,Phase 2,Inflammation,Engages the hydroxycarboxylic acid receptor 2 (HCAR2) on microglia to reduce plaque burden and neuronal dystrophy,,Indiana University,0,,,FALSE,FALSE
+NP03,Phase 2,Neurotransmitter Receptors,"Ion with effects on amyloid, oxidation, and inflammation",,Medesis Pharma SA,0,,,FALSE,FALSE
+Polypill,Phase 2,Undisclosed,Undisclosed,,"Noah Pharmaceuticals, Inc.",0,,,FALSE,FALSE
+Rifaximin,Phase 2,Gut-Brain Axis,Antibiotic to change microbiome composition,,Jasmohan Bajaj,0,,,FALSE,FALSE
+RO7269162,Phase 2,Amyloid beta,Gamma-secretase modulator,,Hoffmann-La Roche,1,Hoffmann-La Roche,Chile|Denmark|France|Germany|Italy|Poland|South Korea|Spain|United Kingdom,TRUE,TRUE
+RQC,Phase 2,Amyloid beta,Prevent or reduce amyloid,,Zaparackas and Knepper LTD,0,,,FALSE,FALSE
+Sabirnetug,Phase 2,Amyloid beta,Monoclonal antibody targeting soluble Aβ,,Acumen Pharmaceuticals,1,Acumen Pharmaceuticals,Canada|Germany|Spain|United Kingdom|United States,FALSE,TRUE
+Sargramostim,Phase 2,Inflammation,Granulocyte macrophage colony stimulating factor,,"University of Colorado, Denver",1,"Alzheimer's Association|National Institute on Aging (NIA)|Partner Therapeutics, Inc.|University of Colorado, Denver",United States,FALSE,FALSE
+Senicapoc,Phase 2,Inflammation,Calcium-activated potassium channel blocker,,"University of California, Davis",1,"Alzheimer's Association|Alzheimer's Drug Discovery Foundation|Biossil Inc.|University of California, Davis",United States,FALSE,FALSE
+SHR-1707,Phase 2,Amyloid beta,Anti-amyloid monoclonal antibody,,"Shanghai Hengrui Pharmaceutical Co., Ltd.",1,"Shanghai Hengrui Pharmaceutical Co., Ltd.",China,FALSE,FALSE
+Simufilam,Phase 2,Synaptic Plasticity/Neuroprotection,Filamin A protein inhibitor; stabilizes amyloid-alpha-7 nicotinic receptor interaction to reduce neurodegeneration,,"Cassava Sciences, Inc.",0,,,FALSE,FALSE
+Siponimod,Phase 2,Inflammation,Immunomodulation; sphingosine 1-phosphate receptor (S1P) modulator; prevents the egression of T lymphocytes from peripheral lymphoid organs; may inhibit neuroinflammation,,"St. Joseph's Hospital and Medical Center, Phoenix",1,"Arizona State University|Laboratory Corporation of America|National Institute on Aging (NIA)|Novartis|St. Joseph's Hospital and Medical Center, Phoenix|Texas Tech University Health Sciences Center",United States,FALSE,FALSE
+Sirolimus,Phase 2,Vasculature,"Enhances cerebral blood flow; also, a mammalian target of rapamycin (mTOR) inhibitor with immunosuppressive effects",,The University of Texas Health Science Center at San AntonioKarolinska Institutet,0,,,FALSE,FALSE
+SPG302,Phase 2,Synaptic Plasticity/Neuroprotection,Increases the density of axospinous glutamatergic synapses,,Spinogenix,1,Spinogenix,Australia,FALSE,FALSE
+Suvorexant,Phase 2,Multiple,Dual orexin receptor antagonist; improved sleep with effects on CSF Aβ and tau,,Washington University School of Medicine,1,Good Ventures|Merck Sharp & Dohme LLC|Washington University School of Medicine,United States,FALSE,FALSE
+Tertomotide,Phase 2,Amyloid beta,"hTERT peptide vaccine; mimics extra-telomeric functions to inhibit neurotoxicity, apoptosis, and reactive oxygen species",,GemVax & Kael,0,,,FALSE,FALSE
+Trazodone,Phase 2,Circadian Rhythm,Serotonin reuptake inhibitor,,Johns Hopkins University,1,Johns Hopkins University|National Institute on Aging (NIA),United States,FALSE,FALSE
+Trontinemab,Phase 2,Amyloid beta,Anti-amyloid monoclonal antibody (gantenerumab) with enhanced blood-brain barrier penetration,,Hoffmann-La Roche,2,Hoffmann-La Roche,Australia|Canada|China|Denmark|France|Germany|Italy|Japan|Poland|South Korea|Spain|Taiwan|United Kingdom|United States,TRUE,TRUE
+UE2343,Phase 2,Growth Factors and Hormones,11-β-hydroxysteroid dehydrogenase type 1 inhibitor,,Actinogen Medical,0,,,FALSE,FALSE
+Valaciclovir,Phase 2,Inflammation,Antiviral against HSV-1 and -2 infection; to prevent Aβ aggregation and plaque deposition,,Columbia University,0,,,FALSE,FALSE
+Valiltramiprosate,Phase 2,Amyloid beta,Prodrug of tramiprosate; inhibits Aβ aggregation into toxic oligomers,,Alzheon Inc.,0,,,FALSE,FALSE
+XPro1595,Phase 2,Inflammation,TNF neutralizer to reduce neuroinflammation,,"Inmune Bio, Inc.Inmune Bio, Inc.",1,"Inmune Bio, Inc.",Australia,FALSE,FALSE
+Yangxue Qingnao,Phase 2,Vasculature,Cerebral blood flow enhancer,,"Dongzhimen Hospital, Beijing",0,,,FALSE,FALSE
+ADEL-Y01,Phase 1,Tau,Monoclonal antibody targeting tau tubulin to decrease tau aggregation and propagation and enhance microglial tau clearance,,"Alzheimer's Disease Expert Lab (ADEL), Inc.",0,,,FALSE,FALSE
+ALIA-1758,Phase 1,Amyloid beta,Anti-pyroglutamate amyloid antibody,,Aliada Therapeutics,0,,,FALSE,FALSE
+ALN-APP,Phase 1,Amyloid beta,RNAi to decrease APP and downstream Aβ-related events,,Alnylam Pharmaceuticals,0,,,FALSE,FALSE
+ALX-001,Phase 1,Amyloid beta,mGluR5 allosteric modulator,,Allyx TherapeuticsAllyx Therapeutics,0,,,FALSE,FALSE
+ALZ-101,Phase 1,Amyloid beta,Anti-amyloid vaccine,,Alzinova AB,0,,,FALSE,FALSE
+APNmAb005,Phase 1,Tau,Anti-tau monoclonal antibody,,"APRINOIA Therapeutics, LLC",0,,,FALSE,FALSE
+AV-1959D,Phase 1,Amyloid beta,Anti-amyloid vaccine,,Institute for Molecular Medicine,0,,,FALSE,FALSE
+BCG vaccine,Phase 1,Inflammation,Immunomodulator,,Tamir Ben-Hur,0,,,FALSE,FALSE
+BnH-015B,Phase 1,Neurotransmitter receptors,Modulates GluN2B binding of NMDA receptors; Regulates BDNF/TRK-Beta and microglial-mediated IL-33-OPN signaling,,BnH Research,0,,,FALSE,FALSE
+Brexanolone,Phase 1,Neurogenesis,Allosteric modulator of GABA-A receptors,,University of Arizona,0,,,FALSE,FALSE
+Cannabidiol,Phase 1,Neurotransmitter receptors,Cannabinoid with effects on cannabinoid receptors,,Mclean Hospital,1,"University of Colorado, Denver",United States,FALSE,FALSE
+Centella asiatica,Phase 1,Synaptic Plasticity/Neuroprotection,Antioxidant and anti-inflammatory agent with synaptic and neuroprotective effects,,Oregon Health and Science University,0,,,FALSE,FALSE
+Choline,Phase 1,Metabolism and Bioenergetics,Stabilizes the lipid metabolism and concomitantly restoring normal cell function by increasing phosphatidylcholine activity via the Kennedy pathway,,Paul E Schulz,0,,,FALSE,FALSE
+CM383,Phase 1,Amyloid beta,Anti-amyloid monoclonal antibody,,Keymed Biosciences Co.LtdKeymed Biosciences Co.Ltd,0,,,FALSE,FALSE
+CpG1018,Phase 1,Inflammation,Toll-like receptor nine agonist leading to reduced Aβ plaques and tau pathology,,NYU Langone Health,0,,,FALSE,FALSE
+CS6253,Phase 1,"APOE, lipids and lipoprotein receptors","Adenosine triphosphate-binding cassette transporter A1 (ABCA1) transfers lipids to ApoE, and increases clearance of amyloid beta from the brain",,"Artery Therapeutics, Inc.",0,,,FALSE,FALSE
+DDN-A-0101,Phase 1,Amyloid beta,Plaque reduction with reduced neuroinflammation and preserved synaptophysin,,Pharmacobio,0,,,FALSE,FALSE
+Donepezil,Phase 1,Neurotransmitter receptors,Acetylcholinesterase inhibitor,,"G2GBio, Inc.",4,"Assistance Publique - Hôpitaux de Paris|Duke University|France Alzheimer|National Institute on Aging (NIA)|Shanghai Jiao Tong University School of Medicine|Wanbangde Pharmaceutical Group Co., LTD",France|United States,FALSE,TRUE
+Emraclidine,Phase 1,Neurotransmitter receptors,M4-selective positive allosteric modulator,,"Cerevel Therapeutics, LLC",0,,,FALSE,FALSE
+Emtricitabine,Phase 1,Inflammation,NRTI; reduce neuroinflammation,,Butler Hospital,0,,,FALSE,FALSE
+HHT201,Phase 1,Neurotransmitter receptors,Cholinesterase inhibitor,,"Shanghai Synergy Pharmaceutical Sciences Co., Ltd.",0,,,FALSE,FALSE
+IBC-Ab002,Phase 1,Inflammation,Anti-programmed death-ligand 1 (PD-L1) immune checkpoint inhibitor,,Immunobrain Checkpoint,0,,,FALSE,FALSE
+ION269,Phase 1,Amyloid beta,Antisense oligonucleotide directed at amyloid precursor protein,,"Ionis Pharmaceuticals, Inc.",0,,,FALSE,FALSE
+Leucettinib-21,Phase 1,Tau,Antagonizes activity of the protein (DYRK1A protein kinase) derived from the DYRK1A gene to decrease tau hyperphosphorylation,,Perha Pharmaceuticals,0,,,FALSE,FALSE
+LY03017,Phase 1,Neurotransmitter Receptors,Undisclosed,,Luye Pharma Group Ltd.,0,,,FALSE,FALSE
+LY03020,Phase 1,Neurotransmitter Receptors,A dual TAAR1/5-HT2CR agonist,,Luye Pharma Group Ltd.,0,,,FALSE,FALSE
+LY3954068,Phase 1,Tau,Undisclosed,,Eli Lilly and Company,0,,,FALSE,FALSE
+LY4006895,Phase 1,Undisclosed,Undisclosed,,Eli Lilly and Company,0,,,FALSE,FALSE
+Mecamylamine,Phase 1,Neurotransmitter Receptors,Nicotinic antagonist,,University of Vermont,0,,,FALSE,FALSE
+MK-2214,Phase 1,Tau,Anti-tau monoclonal antibody,,Merck Sharp & Dohme LLC,1,Merck Sharp & Dohme LLC,Argentina|Australia|Belgium|Japan|Netherlands|South Korea|Spain|United Kingdom|United States,FALSE,TRUE
+Nicotinamide riboside,Phase 1,Metabolism and Bioenergetics,Mitochondrial function enhancer and antioxidant,,Mclean Hospital,0,,,FALSE,FALSE
+NIO752,Phase 1,Tau,Anti-tau antisense oligonucleotide,,"Novartis PharmaceuticalsUniversity College, London",0,,,FALSE,FALSE
+NMRA-323511,Phase 1,Growth Factors and Hormones,Vasopressin V1a receptor antagonists,,"Neumora Therapeutics, Inc.",0,,,FALSE,FALSE
+OLX-07010,Phase 1,Tau,Inhibits tau self-aggregation,,"Oligomerix, Inc",0,,,FALSE,FALSE
+Plasma exchange,Phase 1,Inflammation,Anti-inflammatory,,Oslo University Hospital,0,,,FALSE,FALSE
+PMN310,Phase 1,Amyloid beta,Humanized immunoglobulin monoclonal antibody directed at oligomeric amyloid species,,"ProMis Neurosciences, Inc",0,,,FALSE,FALSE
+Probiotics,Phase 1,Gut-brain Axis,Inflammation/immunity,,University of Nicosia,0,,,FALSE,FALSE
+Psilocybin,Phase 1,Neurotransmitter receptors,Serotonin 2A receptor (5-HT2A) agonist,,Johns Hopkins University,0,,,FALSE,FALSE
+Recombinant human serum albumin,Phase 1,Oxidative Stress,Antioxidant properties of albumin,,Protgen Ltd,0,,,FALSE,FALSE
+Remternetug,Phase 1,Amyloid beta,Anti-amyloid monoclonal antibody,,Eli Lilly and Company,4,Alzheimer's Association|Eli Lilly and Company|GHR Foundation|National Institute on Aging (NIA)|Private Donors|Washington University School of Medicine,Argentina|Australia|Canada|China|Colombia|France|Germany|Italy|Japan|Mexico|Netherlands|New Zealand|Puerto Rico|South Korea|Spain|Taiwan|United Kingdom|United States,FALSE,TRUE
+SHR-1707,Phase 1,Amyloid beta,Anti-amyloid monoclonal antibody,,Atridia Pty Ltd.,1,"Shanghai Hengrui Pharmaceutical Co., Ltd.",China,FALSE,FALSE
+Sirolimus,Phase 1,Vasculature,Enhances cerebral blood flow; also a mammalian target of rapamycin (mTOR) inhibitor with immunosuppressive effects,,University of Missouri-Columbia,0,,,FALSE,FALSE
+TML-6,Phase 1,Inflammation,Synthetic curcumin analogue with anti-inflammatory properties; activates autophagy; reduces amyloid accumulation,,"Merry Life Biomedical Co., Ltd.",0,,,FALSE,FALSE
+VG-3927,Phase 1,Inflammation,TREM2 agonist,,"Vigil Neuroscience, Inc.",0,,,FALSE,FALSE
+VNA-318,Phase 1,Metabolism and Bioenergetics,Induction of mitophagy,,VANDRIA,0,,,FALSE,FALSE

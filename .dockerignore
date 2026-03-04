@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next
+**/dist
+**/.turbo
+
+# Development
+.env
+.env.local
+.env*.local
+*.log
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+**/*.test.ts
+**/__tests__
+
+# Data files
+data/
+*.csv
+*.xlsx
+*.docx

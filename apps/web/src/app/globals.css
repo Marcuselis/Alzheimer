@@ -1,0 +1,233 @@
+:root {
+  /* Brand Constants */
+  --brand-teal: #469B94;
+  /* Primary Brand Color */
+  --brand-teal-light: #E6F5F4;
+  /* Backgrounds for active items/badges */
+  --brand-teal-dark: #2C6B66;
+  /* Hover states */
+
+  /* Base Application Colors */
+  --bg-app: #FFFFFF;
+  /* App Background (Pure White) */
+  --bg-subtle: #F9FAFB;
+  /* Subtle backgrounds (Input fields, hovers) */
+
+  /* Text Colors using Inter/System Stack */
+  --text-primary: #1A202C;
+  /* Main headings */
+  --text-secondary: #5F6B7C;
+  /* Body text, descriptions */
+  --text-tertiary: #94A3B8;
+  /* Placeholders, subtle labels */
+
+  /* Linear-Style Borders & Depth */
+  --border-subtle: #E2E8F0;
+  /* Standard borders */
+  --border-focus: #469B94;
+  /* Active input borders */
+
+  /* Spacing & Layout */
+  --radius-md: 6px;
+  /* Standard Linear radius */
+  --radius-lg: 8px;
+  /* Larger cards */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* --- Layout Utilities --- */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+  /* More breathing room */
+}
+
+/* --- Component: Linear Card --- */
+.linear-card {
+  background: white;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  /* No heavy shadow, just border definition */
+}
+
+/* --- Component: Buttons --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  background: var(--brand-teal);
+  color: white;
+  border: 1px solid transparent;
+  /* Optical alignment */
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover {
+  background: var(--brand-teal-dark);
+  color: white;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  background: white;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-subtle);
+  border-color: #CBD5E0;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+/* --- Component: Inputs --- */
+.form-input,
+.form-select {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: white;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 1px var(--border-focus);
+  /* Linear focus ring */
+}
+
+.form-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* --- Typography --- */
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.label-uppercase {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* --- Badges & Chips --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  /* Slightly squarer than pill */
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* --- Leaflet Map Overrides --- */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  padding: 0 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.leaflet-popup-tip {
+  display: none;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  color: var(--text-secondary) !important;
+  background: white !important;
+  border: none !important;
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Nordic Region Hover --- */
+.nordic-row:hover {
+  background-color: var(--bg-subtle) !important;
+}
