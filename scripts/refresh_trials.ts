@@ -21,6 +21,12 @@ interface ApiIntervention {
     name?: string;
 }
 
+interface ApiOfficial {
+    name?: string;
+    role?: string;
+    affiliation?: string;
+}
+
 interface ApiStudy {
     protocolSection: {
         identificationModule: {
@@ -47,6 +53,7 @@ interface ApiStudy {
         };
         contactsLocationsModule?: {
             locations?: ApiLocation[];
+            overallOfficials?: ApiOfficial[];
         };
         armsInterventionsModule?: {
             interventions?: ApiIntervention[];
@@ -66,6 +73,7 @@ interface Trial {
     interventions: string; // Pipe-separated strings: "TYPE: Name"
     conditions: string[];
     geo?: ([number, number] | null)[]; // Array of [lat, lng]
+    principal_investigators?: string; // Pipe-separated "Name, Affiliation"
 }
 
 const BASE_URL = "https://clinicaltrials.gov/api/v2/studies";
@@ -76,7 +84,7 @@ const PARAMS = {
     "filter.overallStatus": "RECRUITING|NOT_YET_RECRUITING|ACTIVE_NOT_RECRUITING",
     // "query.studyType": "INTERVENTIONAL", // Caused 400 error
     "pageSize": "100",
-    "fields": "protocolSection.identificationModule.nctId,protocolSection.identificationModule.briefTitle,protocolSection.statusModule.overallStatus,protocolSection.sponsorCollaboratorsModule.leadSponsor.name,protocolSection.conditionsModule.conditions,protocolSection.designModule.phases,protocolSection.designModule.enrollmentInfo.count,protocolSection.designModule.studyType,protocolSection.contactsLocationsModule.locations,protocolSection.armsInterventionsModule.interventions"
+    "fields": "protocolSection.identificationModule.nctId,protocolSection.identificationModule.briefTitle,protocolSection.statusModule.overallStatus,protocolSection.sponsorCollaboratorsModule.leadSponsor.name,protocolSection.conditionsModule.conditions,protocolSection.designModule.phases,protocolSection.designModule.enrollmentInfo.count,protocolSection.designModule.studyType,protocolSection.contactsLocationsModule.locations,protocolSection.contactsLocationsModule.overallOfficials,protocolSection.armsInterventionsModule.interventions"
 };
 
 function fetchPage(pageToken?: string): Promise<{ studies: ApiStudy[], nextPageToken?: string }> {
@@ -159,6 +167,12 @@ async function main() {
             // API returns array e.g. ["PHASE3"], we want string "PHASE3"
             const phase = proto.designModule?.phases?.join('|') || "N/A";
 
+            // Extract Principal Investigators
+            const principal_investigators = (proto.contactsLocationsModule?.overallOfficials || [])
+                .filter(o => o.role === 'PRINCIPAL_INVESTIGATOR')
+                .map(o => [o.name, o.affiliation].filter(Boolean).join(', '))
+                .join('|') || undefined;
+
             return {
                 nct_id: proto.identificationModule.nctId,
                 title: proto.identificationModule.briefTitle,
@@ -169,7 +183,8 @@ async function main() {
                 locations: locations,
                 interventions: interventions,
                 conditions: proto.conditionsModule?.conditions || [],
-                geo: geo.length > 0 ? geo : undefined
+                geo: geo.length > 0 ? geo : undefined,
+                principal_investigators,
             };
         });
 

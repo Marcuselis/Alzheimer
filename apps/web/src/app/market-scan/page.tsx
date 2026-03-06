@@ -546,6 +546,7 @@ export default function MarketScanPage() {
                   <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Molecule</th>
                   <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', width: '30%' }}>Title / Sponsor</th>
                   <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Locations</th>
+                  <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Principal Investigator</th>
                   <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Phase</th>
                   <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Status</th>
                 </tr>
@@ -600,6 +601,15 @@ export default function MarketScanPage() {
                             ))}
                           </div>
                         ) : <span style={{ color: 'var(--text-tertiary)', fontSize: '11px' }}>--</span>}
+                      </td>
+                      <td style={{ padding: '16px 20px', verticalAlign: 'top' }}>
+                        {trial.principal_investigators ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {(trial.principal_investigators as string).split('|').map((pi: string, i: number) => (
+                              <div key={i} style={{ fontSize: '12px', color: 'var(--text-primary)', lineHeight: '1.4' }}>{pi}</div>
+                            ))}
+                          </div>
+                        ) : <span style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>--</span>}
                       </td>
                       <td style={{ padding: '16px 20px', verticalAlign: 'top' }}>
                         <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text-secondary)' }}>{trial.phase?.replace('PHASE', 'Phase ') || '--'}</span>

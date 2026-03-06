@@ -11,6 +11,7 @@ export interface Trial {
   locations: string;
   interventions: string;
   conditions?: string[];
+  principal_investigators?: string; // Pipe-separated "Name, Affiliation"
 }
 
 export interface ProcessedTrial extends Trial {
