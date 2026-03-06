@@ -6,6 +6,35 @@ import Link from 'next/link';
 import { DEFAULT_EXPORT_COLUMNS, EXPORT_COLUMNS, type ExportColumnKey } from '@/lib/trialExport';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
+const PHASE_OPTIONS = [
+  { value: 'EARLY_PHASE1', label: 'Early Phase 1' },
+  { value: 'PHASE1', label: 'Phase 1' },
+  { value: 'PHASE2', label: 'Phase 2' },
+  { value: 'PHASE3', label: 'Phase 3' },
+  { value: 'PHASE4', label: 'Phase 4' },
+] as const;
+
+type Filters = {
+  sponsor: string;
+  phase: string[];
+  nct: string;
+  search: string;
+  molecule: string;
+  country: string;
+  city: string;
+  region: 'All' | 'Nordic';
+};
+
+const EMPTY_FILTERS: Filters = {
+  sponsor: '',
+  phase: [],
+  nct: '',
+  search: '',
+  molecule: '',
+  country: '',
+  city: '',
+  region: 'All',
+};
 
 // --- Components ---
 
@@ -123,20 +152,22 @@ function NordicDashboard({ facets, onCountryClick }: { facets: any, onCountryCli
 }
 
 export default function MarketScanPage() {
-  const [searchParams, setSearchParams] = useState({
-    sponsor: '', phase: '', nct: '', search: '', molecule: '', country: '', city: '', region: 'All'
-  });
-
-  const [activeFilters, setActiveFilters] = useState({
-    sponsor: '', phase: '', nct: '', search: '', molecule: '', country: '', city: '', region: 'All'
-  });
+  const [searchParams, setSearchParams] = useState<Filters>(EMPTY_FILTERS);
+  const [activeFilters, setActiveFilters] = useState<Filters>(EMPTY_FILTERS);
 
   // Build query string
   const buildQueryString = () => {
     const params = new URLSearchParams();
     Object.entries(activeFilters).forEach(([key, value]) => {
-      if (value && value !== 'All') params.append(key, value);
-      if (key === 'region' && value === 'Nordic') params.append(key, value);
+      if (key === 'phase') {
+        (value as string[]).forEach((phase) => params.append('phase', phase));
+        return;
+      }
+      if (key === 'region') {
+        if (value === 'Nordic') params.append('region', value);
+        return;
+      }
+      if (value) params.append(key, value as string);
     });
     return params.toString();
   };
@@ -198,19 +229,32 @@ export default function MarketScanPage() {
 
   const handleSearch = () => setActiveFilters({ ...searchParams });
 
-  const removeFilter = (key: string) => {
-    const updated = { ...activeFilters, [key]: key === 'region' ? 'All' : '' };
+  const removeFilter = (key: keyof Filters) => {
+    const updated: Filters = {
+      ...activeFilters,
+      [key]: key === 'region' ? 'All' : key === 'phase' ? [] : ''
+    };
     setActiveFilters(updated);
     setSearchParams(updated);
   };
 
   const handleClear = () => {
-    const empty = { sponsor: '', phase: '', nct: '', search: '', molecule: '', country: '', city: '', region: 'All' };
-    setSearchParams(empty);
-    setActiveFilters(empty);
+    setSearchParams(EMPTY_FILTERS);
+    setActiveFilters(EMPTY_FILTERS);
   };
 
-  const handleInputChange = (field: string, value: string) => setSearchParams(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: Exclude<keyof Filters, 'phase'>, value: string) =>
+    setSearchParams((prev) => ({ ...prev, [field]: value as Filters[typeof field] }));
+
+  const handlePhaseToggle = (phase: string) => {
+    setSearchParams((prev) => {
+      const hasPhase = prev.phase.includes(phase);
+      return {
+        ...prev,
+        phase: hasPhase ? prev.phase.filter((item) => item !== phase) : [...prev.phase, phase]
+      };
+    });
+  };
 
   const toggleExportColumn = (column: ExportColumnKey) => {
     setSelectedExportColumns((previous) => {
@@ -258,6 +302,17 @@ export default function MarketScanPage() {
     }
   };
 
+  const primarySearchFields = [
+    { label: 'Molecule / Intervention', key: 'molecule', placeholder: 'e.g. Lecanemab' },
+    { label: 'Sponsor', key: 'sponsor', placeholder: 'e.g. Roche' },
+    { label: 'NCT Number', key: 'nct', placeholder: 'e.g. NCT0716...' }
+  ] as const;
+
+  const locationSearchFields = [
+    { label: 'Country', key: 'country', placeholder: 'e.g. France' },
+    { label: 'City', key: 'city', placeholder: 'e.g. Paris' }
+  ] as const;
+
   return (
     <div className="container">
       {/* Header */}
@@ -275,7 +330,7 @@ export default function MarketScanPage() {
       <NordicDashboard
         facets={facets}
         onCountryClick={(country) => {
-          const updated = { ...activeFilters, country, region: 'Nordic' };
+          const updated: Filters = { ...activeFilters, country, region: 'Nordic' };
           setSearchParams(updated);
           setActiveFilters(updated);
           // Optional: Scroll to results
@@ -313,11 +368,7 @@ export default function MarketScanPage() {
         <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '20px', color: 'var(--text-primary)' }}>Search Parameters</h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-          {[
-            { label: 'Molecule / Intervention', key: 'molecule', placeholder: 'e.g. Lecanemab' },
-            { label: 'Sponsor', key: 'sponsor', placeholder: 'e.g. Roche' },
-            { label: 'NCT Number', key: 'nct', placeholder: 'e.g. NCT0716...' }
-          ].map((field) => (
+          {primarySearchFields.map((field) => (
             <div key={field.key}>
               <label className="label-uppercase">{field.label}</label>
               <input
@@ -330,17 +381,21 @@ export default function MarketScanPage() {
             </div>
           ))}
           <div>
-            <label className="label-uppercase">Phase</label>
-            <select
-              className="form-select"
-              value={searchParams.phase}
-              onChange={(e) => handleInputChange('phase', e.target.value)}
-            >
-              <option value="">Any Phase</option>
-              <option value="PHASE3">Phase 3</option>
-              <option value="PHASE2">Phase 2</option>
-              <option value="PHASE1">Phase 1</option>
-            </select>
+            <label className="label-uppercase">Phases (Multi-select)</label>
+            <div style={{ border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '8px 10px', background: 'white', minHeight: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {PHASE_OPTIONS.map((phaseOption) => (
+                  <label key={phaseOption.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={searchParams.phase.includes(phaseOption.value)}
+                      onChange={() => handlePhaseToggle(phaseOption.value)}
+                    />
+                    <span>{phaseOption.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -356,10 +411,7 @@ export default function MarketScanPage() {
               <option value="Nordic">Nordic Countries</option>
             </select>
           </div>
-          {[
-            { label: 'Country', key: 'country', placeholder: 'e.g. France' },
-            { label: 'City', key: 'city', placeholder: 'e.g. Paris' }
-          ].map((field) => (
+          {locationSearchFields.map((field) => (
             <div key={field.key}>
               <label className="label-uppercase">{field.label}</label>
               <input
@@ -381,11 +433,17 @@ export default function MarketScanPage() {
         </div>
 
         {/* Active Filters */}
-        {Object.entries(activeFilters).some(([k, v]) => v && v !== 'All') && (
+        {Object.entries(activeFilters).some(([, value]) => Array.isArray(value) ? value.length > 0 : value && value !== 'All') && (
           <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed var(--border-subtle)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {Object.entries(activeFilters).map(([key, value]) => {
-                if (!value || value === 'All') return null;
+              {(Object.entries(activeFilters) as [keyof Filters, Filters[keyof Filters]][]).map(([key, value]) => {
+                if (Array.isArray(value) && value.length === 0) return null;
+                if (!Array.isArray(value) && (!value || value === 'All')) return null;
+                const displayValue = Array.isArray(value)
+                  ? value
+                    .map((item) => item === 'EARLY_PHASE1' ? 'Early Phase 1' : item.replace('PHASE', 'Phase '))
+                    .join(', ')
+                  : value;
                 return (
                   <div key={key} style={{
                     display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px',
@@ -395,7 +453,7 @@ export default function MarketScanPage() {
                   }}>
                     <span style={{ opacity: 0.7, textTransform: 'uppercase' }}>{key}</span>
                     <span style={{ width: '1px', height: '10px', background: 'currentColor', opacity: 0.3 }}></span>
-                    <span>{value}</span>
+                    <span>{displayValue}</span>
                     <button onClick={() => removeFilter(key)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'inherit', marginLeft: '4px', fontSize: '14px', lineHeight: 0.5 }}>×</button>
                   </div>
                 );

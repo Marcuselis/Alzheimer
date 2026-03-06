@@ -93,10 +93,17 @@ export function applyTrialFilters(trials: ProcessedTrial[], searchParams: URLSea
     filteredTrials = filteredTrials.filter((trial) => (trial.status || '').toLowerCase().includes(term));
   }
 
-  const phase = searchParams.get('phase');
-  if (phase && phase !== 'Any Phase') {
-    const term = phase.toUpperCase();
-    filteredTrials = filteredTrials.filter((trial) => (trial.phase || '').includes(term));
+  const phases = searchParams
+    .getAll('phase')
+    .flatMap((phase) => phase.split(','))
+    .map((phase) => phase.trim().toUpperCase())
+    .filter(Boolean)
+    .filter((phase) => phase !== 'ANY PHASE');
+  if (phases.length > 0) {
+    filteredTrials = filteredTrials.filter((trial) => {
+      const trialPhase = (trial.phase || '').toUpperCase();
+      return phases.some((phase) => trialPhase.includes(phase));
+    });
   }
 
   const region = searchParams.get('region');

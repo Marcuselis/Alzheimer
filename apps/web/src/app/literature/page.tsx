@@ -4,9 +4,25 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
-import { apiGet } from '@/lib/api';
 
 const DEFAULT_MARKET_ID = 'market_alzheimers_phase23';
+
+const fetcher = async <T,>(url: string): Promise<T> => {
+  const response = await fetch(url);
+
+  let payload: any = null;
+  try {
+    payload = await response.json();
+  } catch {
+    // Ignore non-JSON upstream responses and fall back to status text.
+  }
+
+  if (!response.ok) {
+    throw new Error(payload?.error || payload?.message || `API error: ${response.status}`);
+  }
+
+  return payload as T;
+};
 
 function LiteratureContent() {
   const searchParams = useSearchParams();
@@ -32,14 +48,14 @@ function LiteratureContent() {
     submittedQuery
       ? `/api/literature/search?q=${encodeURIComponent(submittedQuery)}&synonyms=${encodeURIComponent(searchSynonyms)}&recencyDays=${recencyDays}&maxResults=100`
       : null,
-    apiGet,
+    fetcher,
     { revalidateOnFocus: false }
   );
 
   // Fetch market trends
   const { data: trends, isLoading: trendsLoading } = useSWR<any>(
     `/api/markets/${DEFAULT_MARKET_ID}/literature/trends`,
-    apiGet,
+    fetcher,
     { revalidateOnFocus: false }
   );
 

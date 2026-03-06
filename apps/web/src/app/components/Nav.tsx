@@ -22,6 +22,7 @@ export default function Nav() {
     { href: '/market-scan', label: 'Market Scan' },
     { href: '/map', label: 'Trial Map' },
     { href: '/literature', label: 'Literature' },
+    { href: '/funnel', label: 'Prospect Funnel' },
     { href: '/settings', label: 'Settings' },
   ];
 
