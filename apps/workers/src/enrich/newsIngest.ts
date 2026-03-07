@@ -4,7 +4,7 @@
  * Creates news events tied to internal graph
  */
 
-import { db } from '../../db/client';
+import { db } from '../../../api/src/db/client';
 import fetch from 'node-fetch';
 
 interface NewsIngestResult {

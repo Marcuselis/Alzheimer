@@ -2701,10 +2701,26 @@ async function start() {
         offset,
       } = request.query as any;
 
+      const parseMulti = (value: unknown): string[] | undefined => {
+        if (!value) return undefined;
+        if (Array.isArray(value)) {
+          const flattened = value
+            .flatMap(v => String(v).split(','))
+            .map(v => v.trim())
+            .filter(Boolean);
+          return flattened.length > 0 ? flattened : undefined;
+        }
+        const split = String(value)
+          .split(',')
+          .map(v => v.trim())
+          .filter(Boolean);
+        return split.length > 0 ? split : undefined;
+      };
+
       const { getNewsEvents } = await import('./news');
       const events = await getNewsEvents({
-        eventTypes: eventTypes ? (Array.isArray(eventTypes) ? eventTypes : [eventTypes]) : undefined,
-        importanceLevels: importanceLevels ? (Array.isArray(importanceLevels) ? importanceLevels : [importanceLevels]) : undefined,
+        eventTypes: parseMulti(eventTypes) as any,
+        importanceLevels: parseMulti(importanceLevels) as any,
         entityType,
         entityId,
         limit: parseInt(limit, 10) || 50,
