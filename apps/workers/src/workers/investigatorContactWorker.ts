@@ -29,8 +29,8 @@ export async function enqueueInvestigatorEnrichment(
     'enrich',
     { investigatorId, fullName, institution, country, topic },
     {
-      jobId: `inv-enrich-${investigatorId}`,
-      deduplication: { id: investigatorId },
+      // Keep unique IDs so completed retained jobs do not block explicit re-runs.
+      jobId: `inv-enrich-${investigatorId}-${Date.now()}`,
     }
   );
   return job.id ?? investigatorId;
@@ -70,6 +70,10 @@ worker.on('completed', (job: Job) => {
 
 worker.on('failed', (job: Job | undefined, err: Error) => {
   console.error(`[InvContactWorker] Job ${job?.id} failed:`, err.message);
+});
+
+worker.on('error', (err: Error) => {
+  console.error('[InvContactWorker] Worker error:', err.message);
 });
 
 export { worker as investigatorContactWorker };

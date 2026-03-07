@@ -11,6 +11,18 @@ export const sponsorRefreshQueue = new Queue('sponsor-refresh', { connection });
 export const programRefreshQueue = new Queue('program-refresh', { connection });
 export const analysisQueue = new Queue('analysis', { connection });
 export const regionAttractivenessQueue = new Queue('region-attractiveness', { connection });
+export const investigatorContactQueue = new Queue('investigator-contact-enrichment', {
+  connection,
+  defaultJobOptions: {
+    attempts: 2,
+    backoff: {
+      type: 'exponential',
+      delay: 15000,
+    },
+    removeOnComplete: { count: 200 },
+    removeOnFail: { count: 100 },
+  },
+});
 
 export const queueEvents = new QueueEvents('market-refresh', { connection });
 
@@ -100,6 +112,26 @@ export async function enqueueRegionAttractiveness(marketId: string) {
         type: 'exponential',
         delay: 5000,
       },
+    }
+  );
+  return job.id;
+}
+
+export interface InvestigatorEnrichmentJobData {
+  investigatorId: string;
+  fullName: string;
+  institution: string | null;
+  country: string | null;
+  topic: string | null;
+}
+
+export async function enqueueInvestigatorContactEnrichment(data: InvestigatorEnrichmentJobData) {
+  const job = await investigatorContactQueue.add(
+    'enrich',
+    data,
+    {
+      // Unique job IDs allow manual re-runs while route-level logic still blocks duplicate in-flight runs.
+      jobId: `inv-enrich-${data.investigatorId}-${Date.now()}`,
     }
   );
   return job.id;

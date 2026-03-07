@@ -9,6 +9,7 @@ import {
   enqueueSponsorRefresh,
   enqueueProgramRefresh,
   enqueueRegionAttractiveness,
+  enqueueInvestigatorContactEnrichment,
   getJobStatus
 } from './queue/queue';
 import {
@@ -2583,36 +2584,40 @@ async function start() {
     }
 
     try {
-      const Redis = (await import('ioredis')).default;
-      const { Queue } = await import('bullmq');
-      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', { maxRetriesPerRequest: null });
-      const queue = new Queue('investigator-contact-enrichment', { connection: redis });
-
-      await queue.add(
-        'enrich',
-        {
-          investigatorId: personId,
-          fullName,
-          institution: institution ?? null,
-          country: country ?? null,
-          topic: topic ?? null,
-        },
-        { jobId: `inv-enrich-${personId}`, deduplication: { id: personId } }
+      // Prevent duplicate in-flight runs while still allowing explicit re-runs after completion/failure.
+      const existing = await db.query(
+        `SELECT status
+         FROM investigator_enrichment_status
+         WHERE investigator_id = $1`,
+        [personId]
       );
+      const currentStatus = existing.rows[0]?.status as string | undefined;
+      if (currentStatus === 'queued' || currentStatus === 'running') {
+        return reply.code(202).send({
+          investigatorId: personId,
+          status: currentStatus,
+          message: 'Enrichment already in progress',
+        });
+      }
+
+      const jobId = await enqueueInvestigatorContactEnrichment({
+        investigatorId: personId,
+        fullName,
+        institution: institution ?? null,
+        country: country ?? null,
+        topic: topic ?? null,
+      });
 
       // Mark as queued in DB
-      const pg = (await import('pg')).default;
-      const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://app:app@localhost:5432/app' });
-      await pool.query(
+      await db.query(
         `INSERT INTO investigator_enrichment_status (investigator_id, status, contacts_found)
          VALUES ($1, 'queued', 0)
          ON CONFLICT (investigator_id) DO UPDATE
            SET status = 'queued', updated_at = NOW()`,
         [personId]
       );
-      await pool.end();
 
-      return { investigatorId: personId, status: 'queued' };
+      return reply.code(202).send({ investigatorId: personId, status: 'queued', jobId });
     } catch (error: any) {
       fastify.log.error({ personId, error: error.message }, 'Failed to queue investigator enrichment');
       return reply.code(500).send({ error: error.message });
