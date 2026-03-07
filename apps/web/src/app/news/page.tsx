@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 
+// Get userId from localStorage (simplified — would use auth context in production)
+const getUserId = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('userId') || 'demo-user';
+  }
+  return 'demo-user';
+};
+
 interface NewsEvent {
   id: string;
   eventType: string;
@@ -235,27 +243,90 @@ export default function NewsPage() {
                       </div>
                     )}
 
-                    {/* Action button */}
-                    {event.sourceUrl && (
-                      <a
-                        href={event.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {/* Action buttons */}
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {event.sourceUrl && (
+                        <a
+                          href={event.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '6px 12px',
+                            borderRadius: '5px',
+                            background: 'var(--brand-teal)',
+                            color: 'white',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          View source
+                        </a>
+                      )}
+
+                      {/* Watch entity button */}
+                      {event.entities.length > 0 && (
+                        <button
+                          onClick={() => {
+                            const entity = event.entities[0];
+                            fetch('/api/watchlists', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                userId: getUserId(),
+                                entityType: entity.entityType,
+                                entityId: entity.entityId,
+                                entityName: entity.entityName,
+                              }),
+                            })
+                              .then(() => alert(`Watching ${entity.entityName || entity.entityId}`))
+                              .catch(err => alert(`Error: ${err.message}`));
+                          }}
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '6px 12px',
+                            borderRadius: '5px',
+                            background: 'white',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          👁️ Watch
+                        </button>
+                      )}
+
+                      {/* Add to prospect funnel button */}
+                      <button
+                        onClick={() => {
+                          fetch(`/api/news/${event.id}/add-to-funnel`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              userId: getUserId(),
+                              funnelStage: 'lead',
+                              entityType: event.entities[0]?.entityType,
+                              entityId: event.entities[0]?.entityId,
+                            }),
+                          })
+                            .then(() => alert('Added to prospect funnel'))
+                            .catch(err => alert(`Error: ${err.message}`));
+                        }}
                         style={{
-                          display: 'inline-block',
-                          marginTop: '12px',
                           fontSize: '11px',
                           fontWeight: 600,
                           padding: '6px 12px',
                           borderRadius: '5px',
-                          background: 'var(--brand-teal)',
-                          color: 'white',
-                          textDecoration: 'none',
+                          background: 'white',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
                         }}
                       >
-                        View source
-                      </a>
-                    )}
+                        🎯 Prospect
+                      </button>
+                    </div>
                   </div>
                 );
               })}

@@ -2743,6 +2743,135 @@ async function start() {
     }
   });
 
+  // ── Watchlist & Prospect Funnel Endpoints (Phase 3) ────────────────────────
+
+  // GET /api/watchlists — fetch user's watchlist
+  fastify.get('/api/watchlists', async (request, reply) => {
+    try {
+      const { userId } = request.query as { userId?: string };
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const { getWatchlists } = await import('./newsWatchlists');
+      const watchlists = await getWatchlists(userId);
+      return { watchlists };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to fetch watchlists');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // POST /api/watchlists — add to watchlist
+  fastify.post('/api/watchlists', async (request, reply) => {
+    try {
+      const { userId, entityType, entityId, entityName, alertOnEvents } = request.body as any;
+      if (!userId || !entityType || !entityId) {
+        return reply.code(400).send({ error: 'userId, entityType, entityId required' });
+      }
+
+      const { addWatchlist } = await import('./newsWatchlists');
+      const watchlistId = await addWatchlist(userId, entityType, entityId, entityName, alertOnEvents);
+      return { id: watchlistId, added: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to add watchlist');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // DELETE /api/watchlists/:id — remove from watchlist
+  fastify.delete('/api/watchlists/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { userId } = request.query as { userId?: string };
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const { removeWatchlist } = await import('./newsWatchlists');
+      await removeWatchlist(userId, id);
+      return { removed: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to remove watchlist');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // POST /api/news/:id/add-to-funnel — add news event to prospect funnel
+  fastify.post('/api/news/:id/add-to-funnel', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { userId, funnelStage, entityType, entityId, metadata } = request.body as any;
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const { addNewsEventToProspectFunnel } = await import('./newsWatchlists');
+      const actionId = await addNewsEventToProspectFunnel(
+        userId,
+        id,
+        funnelStage || 'lead',
+        entityType,
+        entityId,
+        metadata
+      );
+      return { actionId, added: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to add to prospect funnel');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/prospect-actions — fetch user's prospect actions
+  fastify.get('/api/prospect-actions', async (request, reply) => {
+    try {
+      const { userId } = request.query as { userId?: string };
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const { getProspectActions } = await import('./newsWatchlists');
+      const actions = await getProspectActions(userId);
+      return { actions };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to fetch prospect actions');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/alerts — fetch user's alerts
+  fastify.get('/api/alerts', async (request, reply) => {
+    try {
+      const { userId, status } = request.query as { userId?: string; status?: string };
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const { getAlerts } = await import('./newsWatchlists');
+      const alerts = await getAlerts(userId, status || 'pending');
+      return { alerts };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to fetch alerts');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // PUT /api/alerts/:id/read — mark alert as read
+  fastify.put('/api/alerts/:id/read', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { markAlertAsRead } = await import('./newsWatchlists');
+      await markAlertAsRead(id);
+      return { read: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to mark alert as read');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // PUT /api/alerts/:id/dismiss — dismiss alert
+  fastify.put('/api/alerts/:id/dismiss', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { dismissAlert } = await import('./newsWatchlists');
+      await dismissAlert(id);
+      return { dismissed: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to dismiss alert');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
   // ── Data Quality Endpoint ─────────────────────────────────────────────────
 
   // GET /api/admin/data-quality — enrichment coverage, verification breakdown, etc.
