@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -76,6 +77,25 @@ export default function SettingsPage() {
         <div style={{ padding: '12px', background: 'var(--bg-subtle)', borderRadius: '6px', fontSize: '12px', color: 'var(--text-tertiary)', border: '1px dashed var(--border-subtle)' }}>
           Advanced assumption configuration modules are currently disabled.
         </div>
+      </div>
+
+      <div className="linear-card" style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-primary)' }}>Admin</h2>
+        <Link href="/admin/data-quality" style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 14px',
+          borderRadius: '6px',
+          border: '1px solid var(--border-subtle)',
+          background: 'var(--bg-subtle)',
+          color: 'var(--text-secondary)',
+          textDecoration: 'none',
+          fontSize: '13px',
+          fontWeight: 500,
+        }}>
+          Data Quality Dashboard
+        </Link>
       </div>
 
       <div className="linear-card" style={{ backgroundColor: '#F8FAFC' }}>

@@ -12,6 +12,7 @@ interface Trial {
     phase: string;
     status: string;
     locations: string;
+    geo?: [number, number][];
 }
 
 export default function MapComponent({ trials }: { trials: Trial[] }) {
@@ -23,21 +24,19 @@ export default function MapComponent({ trials }: { trials: Trial[] }) {
 
             const locs = trial.locations.split('|');
             locs.forEach((loc, idx) => {
-                const coords = getCoordinates(loc);
+                const geoCoords = trial.geo?.[idx];
+                const hasValidGeo = Array.isArray(geoCoords)
+                    && geoCoords.length === 2
+                    && Number.isFinite(geoCoords[0])
+                    && Number.isFinite(geoCoords[1]);
+
+                const coords = hasValidGeo
+                    ? [geoCoords[0], geoCoords[1]] as [number, number]
+                    : getCoordinates(loc);
+
                 if (coords) {
-                    // Deterministic jitter based on NCT ID + location index for stability
-                    const seed = trial.nct_id + idx;
-                    let hash = 0;
-                    for (let i = 0; i < seed.length; i++) {
-                        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-                        hash |= 0;
-                    }
-
-                    const jitterLat = (Math.abs(hash % 100) / 100 - 0.5) * 1.5;
-                    const jitterLng = (Math.abs((hash >> 8) % 100) / 100 - 0.5) * 1.5;
-
                     markers.push({
-                        position: [coords[0] + jitterLat, coords[1] + jitterLng],
+                        position: coords,
                         trial,
                         location: loc.trim()
                     });

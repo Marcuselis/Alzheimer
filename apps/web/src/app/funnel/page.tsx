@@ -123,7 +123,8 @@ function loadState(): Company[] {
 }
 
 export default function FunnelPage() {
-    const [companies, setCompanies] = useState<Company[]>(loadState);
+    const [companies, setCompanies] = useState<Company[]>(INITIAL_COMPANIES);
+    const [didHydrateFromStorage, setDidHydrateFromStorage] = useState(false);
     const [draggedId, setDraggedId]   = useState<string | null>(null);
     const [dragOverStage, setDragOverStage] = useState<FunnelStage | null>(null);
     const [hoveredId, setHoveredId]   = useState<string | null>(null);
@@ -149,8 +150,14 @@ export default function FunnelPage() {
         }));
 
     useEffect(() => {
+        setCompanies(loadState());
+        setDidHydrateFromStorage(true);
+    }, []);
+
+    useEffect(() => {
+        if (!didHydrateFromStorage) return;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(companies));
-    }, [companies]);
+    }, [companies, didHydrateFromStorage]);
 
     // ── Drag & Drop ──────────────────────────────────────────────────────────
     const onDragStart = (e: React.DragEvent, id: string) => {

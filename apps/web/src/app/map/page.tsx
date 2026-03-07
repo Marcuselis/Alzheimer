@@ -171,7 +171,7 @@ export default function MapPage() {
 
             <div className="linear-card" style={{ backgroundColor: '#F8FAFC', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                    <strong>Note:</strong> Map markers are positioned by country with visual jitter to show multiple trials. Zoom in to explore regions.
+                    <strong>Note:</strong> Map markers use trial site city coordinates when available, with country-level fallback only for records missing geolocation data.
                 </div>
             </div>
         </div>

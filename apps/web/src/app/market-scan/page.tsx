@@ -557,9 +557,16 @@ export default function MarketScanPage() {
                   return (
                     <tr key={trial.nct_id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <td style={{ padding: '16px 20px', verticalAlign: 'top' }}>
-                        <Link href={`https://clinicaltrials.gov/study/${trial.nct_id}`} target="_blank" style={{ color: 'var(--brand-teal)', fontWeight: '600' }}>
+                        <Link href={`/trials/${trial.nct_id}`} style={{ color: 'var(--brand-teal)', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
                           {trial.nct_id}
                         </Link>
+                        <a
+                          href={`/trials/${trial.nct_id}#contacts`}
+                          style={{ fontSize: '10px', color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                        >
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                          Contacts
+                        </a>
                       </td>
                       <td style={{ padding: '16px 20px', verticalAlign: 'top' }}>
                         {trial.parsed_molecules && trial.parsed_molecules.length > 0 ? (

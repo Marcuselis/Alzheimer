@@ -23,6 +23,8 @@ export default function Nav() {
     { href: '/map', label: 'Trial Map' },
     { href: '/literature', label: 'Literature' },
     { href: '/funnel', label: 'Prospect Funnel' },
+    { href: '/investigators', label: 'Investigators' },
+    { href: '/sponsors', label: 'Sponsors' },
     { href: '/settings', label: 'Settings' },
   ];
 

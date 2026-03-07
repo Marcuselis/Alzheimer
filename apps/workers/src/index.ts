@@ -57,3 +57,28 @@ process.on('SIGINT', () => {
 setInterval(() => {
   console.log(`[Workers] Heartbeat - still running at ${new Date().toISOString()}`);
 }, 60000); // Log every minute
+
+// ── Auto-enrichment cron ──────────────────────────────────────────────────────
+// Runs once on startup (after 30s to let workers settle), then every 24h.
+// Enqueues up to 20 unenriched trials per run, prioritising Phase 2/3.
+import { runAutoEnrichment } from './jobs/autoEnrichTrialContacts';
+
+const AUTO_ENRICH_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+setTimeout(async () => {
+  try {
+    const result = await runAutoEnrichment();
+    console.log(`[AutoEnrich] Startup run complete: ${result.queued} queued, ${result.skipped} skipped`);
+  } catch (err: any) {
+    console.error('[AutoEnrich] Startup run failed:', err.message);
+  }
+}, 30_000); // Wait 30s for workers to be ready
+
+setInterval(async () => {
+  try {
+    const result = await runAutoEnrichment();
+    console.log(`[AutoEnrich] Daily run complete: ${result.queued} queued, ${result.skipped} skipped`);
+  } catch (err: any) {
+    console.error('[AutoEnrich] Daily run failed:', err.message);
+  }
+}, AUTO_ENRICH_INTERVAL_MS);

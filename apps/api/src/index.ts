@@ -2516,6 +2516,245 @@ async function start() {
     // Continue anyway - market might already exist
   }
 
+  // ── Investigator Endpoints ────────────────────────────────────────────────
+
+  // GET /api/investigators — list top investigators, sorted by influence score
+  fastify.get('/api/investigators', async (request, reply) => {
+    try {
+      const { limit, minScore, orgId } = request.query as any;
+      const { listTopInvestigators } = await import('./investigators');
+      const investigators = await listTopInvestigators({
+        limit: parseInt(limit, 10) || 50,
+        minInfluenceScore: parseInt(minScore, 10) || 0,
+        orgId: orgId || undefined,
+      });
+      return { investigators, total: investigators.length };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to list investigators');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/investigators/:personId — full investigator profile
+  fastify.get('/api/investigators/:personId', async (request, reply) => {
+    const { personId } = request.params as { personId: string };
+    try {
+      const { getInvestigatorProfile } = await import('./investigators');
+      const profile = await getInvestigatorProfile(personId);
+      if (!profile) return reply.code(404).send({ error: 'Investigator not found' });
+      return profile;
+    } catch (error: any) {
+      fastify.log.error({ personId, error: error.message }, 'Failed to get investigator profile');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // ── Investigator Contact Endpoints ───────────────────────────────────────
+
+  // GET /api/investigators/:personId/contacts
+  fastify.get('/api/investigators/:personId/contacts', async (request, reply) => {
+    const { personId } = request.params as { personId: string };
+    try {
+      const { getContactsForInvestigator, getEnrichmentStatus } = await import('./investigatorContacts');
+      const [contacts, enrichmentStatus] = await Promise.all([
+        getContactsForInvestigator(personId),
+        getEnrichmentStatus(personId),
+      ]);
+      return { investigatorId: personId, contacts, enrichmentStatus };
+    } catch (error: any) {
+      fastify.log.error({ personId, error: error.message }, 'Failed to get investigator contacts');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // POST /api/investigators/:personId/enrich
+  // Body: { fullName: string; institution?: string; country?: string; topic?: string }
+  fastify.post('/api/investigators/:personId/enrich', async (request, reply) => {
+    const { personId } = request.params as { personId: string };
+    const { fullName, institution, country, topic } = request.body as {
+      fullName?: string;
+      institution?: string;
+      country?: string;
+      topic?: string;
+    };
+
+    if (!fullName) {
+      return reply.code(400).send({ error: 'fullName is required' });
+    }
+
+    try {
+      const Redis = (await import('ioredis')).default;
+      const { Queue } = await import('bullmq');
+      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', { maxRetriesPerRequest: null });
+      const queue = new Queue('investigator-contact-enrichment', { connection: redis });
+
+      await queue.add(
+        'enrich',
+        {
+          investigatorId: personId,
+          fullName,
+          institution: institution ?? null,
+          country: country ?? null,
+          topic: topic ?? null,
+        },
+        { jobId: `inv-enrich-${personId}`, deduplication: { id: personId } }
+      );
+
+      // Mark as queued in DB
+      const pg = (await import('pg')).default;
+      const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://app:app@localhost:5432/app' });
+      await pool.query(
+        `INSERT INTO investigator_enrichment_status (investigator_id, status, contacts_found)
+         VALUES ($1, 'queued', 0)
+         ON CONFLICT (investigator_id) DO UPDATE
+           SET status = 'queued', updated_at = NOW()`,
+        [personId]
+      );
+      await pool.end();
+
+      return { investigatorId: personId, status: 'queued' };
+    } catch (error: any) {
+      fastify.log.error({ personId, error: error.message }, 'Failed to queue investigator enrichment');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/investigators/:personId/enrichment-status
+  fastify.get('/api/investigators/:personId/enrichment-status', async (request, reply) => {
+    const { personId } = request.params as { personId: string };
+    try {
+      const { getEnrichmentStatus } = await import('./investigatorContacts');
+      const status = await getEnrichmentStatus(personId);
+      return status;
+    } catch (error: any) {
+      fastify.log.error({ personId, error: error.message }, 'Failed to get enrichment status');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // ── Sponsor Endpoints ─────────────────────────────────────────────────────
+
+  // GET /api/sponsors — list sponsors sorted by active trial count
+  fastify.get('/api/sponsors', async (request, reply) => {
+    try {
+      const { limit, minTrials, search } = request.query as any;
+      const { listSponsors } = await import('./sponsors');
+      const sponsors = await listSponsors({
+        limit: parseInt(limit, 10) || 100,
+        minTrials: parseInt(minTrials, 10) || 1,
+        search: search || undefined,
+      });
+      return { sponsors, total: sponsors.length };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to list sponsors');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/sponsors/:sponsorId — full sponsor intelligence profile
+  fastify.get('/api/sponsors/:sponsorId', async (request, reply) => {
+    const { sponsorId } = request.params as { sponsorId: string };
+    try {
+      const { getSponsorDetail } = await import('./sponsors');
+      const detail = await getSponsorDetail(sponsorId);
+      if (!detail) return reply.code(404).send({ error: 'Sponsor not found' });
+      return detail;
+    } catch (error: any) {
+      fastify.log.error({ sponsorId, error: error.message }, 'Failed to get sponsor detail');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // ── Data Quality Endpoint ─────────────────────────────────────────────────
+
+  // GET /api/admin/data-quality — enrichment coverage, verification breakdown, etc.
+  fastify.get('/api/admin/data-quality', async (request, reply) => {
+    try {
+      const { getDataQualityStats } = await import('./dataQuality');
+      const stats = await getDataQualityStats();
+      return stats;
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to get data quality stats');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // ── Trial Contact Enrichment Endpoints ───────────────────────────────────
+
+  // GET /api/trials/:nctId/contacts — return enriched contacts for a trial
+  fastify.get('/api/trials/:nctId/contacts', async (request, reply) => {
+    const { nctId } = request.params as { nctId: string };
+    if (!nctId) return reply.code(400).send({ error: 'nctId required' });
+
+    try {
+      const { getEnrichedContactsForTrial, getEnrichmentJobStatus, getOpportunityScore } = await import('./trialContacts');
+      const [contacts, jobStatus, opportunityScore] = await Promise.all([
+        getEnrichedContactsForTrial(nctId),
+        getEnrichmentJobStatus(nctId),
+        getOpportunityScore(nctId),
+      ]);
+
+      return {
+        nctId,
+        contacts,
+        enrichmentJob: jobStatus,
+        opportunityScore,
+        total: contacts.length,
+      };
+    } catch (error: any) {
+      fastify.log.error({ nctId, error: error.message }, 'Failed to get contacts');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // POST /api/trials/:nctId/enrich — push enrichment job to BullMQ
+  // The worker process (apps/workers) must be running for jobs to execute.
+  fastify.post('/api/trials/:nctId/enrich', async (request, reply) => {
+    const { nctId } = request.params as { nctId: string };
+    if (!nctId) return reply.code(400).send({ error: 'nctId required' });
+
+    try {
+      const { Queue } = await import('bullmq');
+      const Redis = (await import('ioredis')).default;
+      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+        maxRetriesPerRequest: null,
+      });
+      const queue = new Queue('trial-contact-enrichment', { connection: redis });
+      const job = await queue.add(
+        'enrich',
+        { nctId },
+        { jobId: `contact-enrich:${nctId}`, deduplication: { id: nctId } }
+      );
+      // Don't await redis.quit() — it will close after bullmq is done with it
+      void redis.quit();
+
+      return reply.code(202).send({
+        status: 'accepted',
+        nctId,
+        jobId: job.id,
+        message: 'Contact enrichment job queued',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      fastify.log.error({ nctId, error: error.message }, 'Failed to enqueue contact enrichment');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/trials/:nctId/enrichment-status — poll enrichment job status
+  fastify.get('/api/trials/:nctId/enrichment-status', async (request, reply) => {
+    const { nctId } = request.params as { nctId: string };
+    if (!nctId) return reply.code(400).send({ error: 'nctId required' });
+
+    try {
+      const { getEnrichmentJobStatus } = await import('./trialContacts');
+      const status = await getEnrichmentJobStatus(nctId);
+      return { nctId, job: status };
+    } catch (error: any) {
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
   await fastify.listen({ port, host });
   console.log(`[API] Server listening on http://${host}:${port}`);
 
