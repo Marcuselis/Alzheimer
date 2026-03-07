@@ -20,6 +20,7 @@ export default function Nav() {
 
   const navItems = [
     { href: '/market-scan', label: 'Market Scan' },
+    { href: '/news', label: 'News' },
     { href: '/map', label: 'Trial Map' },
     { href: '/literature', label: 'Literature' },
     { href: '/funnel', label: 'Prospect Funnel' },

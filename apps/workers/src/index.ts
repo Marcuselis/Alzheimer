@@ -82,3 +82,25 @@ setInterval(async () => {
     console.error('[AutoEnrich] Daily run failed:', err.message);
   }
 }, AUTO_ENRICH_INTERVAL_MS);
+
+// ── News ingest cron ──────────────────────────────────────────────────────────
+// Runs daily to ingest news from ClinicalTrials.gov, PubMed, sponsor pages
+import { runDailyNewsIngest } from './jobs/newsIngestJob';
+
+const NEWS_INGEST_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+setTimeout(async () => {
+  try {
+    await runDailyNewsIngest();
+  } catch (err: any) {
+    console.error('[NewsIngestJob] Startup run failed:', err.message);
+  }
+}, 60_000); // Wait 60s for workers to settle
+
+setInterval(async () => {
+  try {
+    await runDailyNewsIngest();
+  } catch (err: any) {
+    console.error('[NewsIngestJob] Scheduled run failed:', err.message);
+  }
+}, NEWS_INGEST_INTERVAL_MS);

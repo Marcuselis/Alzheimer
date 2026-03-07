@@ -32,9 +32,54 @@ export interface InvestigatorContact {
 }
 
 export interface EnrichmentOutcomeLog {
+  runId?: string;
+  fullName?: string;
+  institutionInput?: string | null;
+  normalizedOrg?: string | null;
+  domainCandidates?: string[];
+  searchQueries?: string[];
+  pagesFetched?: Array<{
+    query: string;
+    url: string;
+    title: string | null;
+    emailsExtracted: string[];
+    fetchError?: string | null;
+  }>;
+  profilePagesFound?: Array<{
+    url: string;
+    title: string;
+    score: number;
+    status: string;
+    isOfficialPage?: boolean;
+  }>;
+  publishedEmailsFound?: Array<{
+    email: string;
+    sourceUrl: string;
+    sourceLabel: string;
+  }>;
+  generatedEmailCandidates?: string[];
+  verificationResults?: Array<{
+    email: string;
+    pattern: string;
+    status: string;
+    mxValid: boolean | null;
+    catchAll: boolean | null;
+    adjustedConfidence: number;
+    persisted: boolean;
+  }>;
+  contactsPersisted?: Array<{
+    type: string;
+    value: string;
+    status: string;
+    sourceType: string;
+    confidence: number;
+    visible: boolean;
+    isPrimary: boolean;
+  }>;
+  finalDiscardReason?: string | null;
   institutionRaw: string | null;
   domainResolved: string | null;
-  domainSource: 'normalized' | 'inferred' | null;
+  domainSource: 'curated' | 'normalized' | 'inferred' | null;
   webSearchAttempted: boolean;
   webSearchResultCount: number;
   pagesScraped: number;
@@ -51,6 +96,8 @@ export interface EnrichmentOutcomeLog {
 export interface InvestigatorEnrichmentStatus {
   investigatorId: string;
   status: EnrichmentStatusValue;
+  stage: string | null;
+  failureReason: string | null;
   contactsFound: number;
   lastRunAt: string | null;
   errorMessage: string | null;
@@ -135,6 +182,8 @@ export async function getEnrichmentStatus(investigatorId: string): Promise<Inves
     return {
       investigatorId,
       status: 'not_started',
+      stage: null,
+      failureReason: null,
       contactsFound: 0,
       lastRunAt: null,
       errorMessage: null,
@@ -146,6 +195,8 @@ export async function getEnrichmentStatus(investigatorId: string): Promise<Inves
   return {
     investigatorId: r.investigator_id,
     status: r.status,
+    stage: r.stage ?? null,
+    failureReason: r.failure_reason ?? null,
     contactsFound: r.contacts_found,
     lastRunAt: r.last_run_at?.toISOString() ?? null,
     errorMessage: r.error_message ?? null,
@@ -202,6 +253,8 @@ export async function getEnrichmentStatusBatch(
     out.set(r.investigator_id, {
       investigatorId: r.investigator_id,
       status: r.status,
+      stage: r.stage ?? null,
+      failureReason: r.failure_reason ?? null,
       contactsFound: r.contacts_found,
       lastRunAt: r.last_run_at?.toISOString() ?? null,
       errorMessage: r.error_message ?? null,
@@ -210,4 +263,54 @@ export async function getEnrichmentStatusBatch(
     });
   }
   return out;
+}
+
+export async function getEnrichmentDebugForInvestigator(investigatorId: string) {
+  const [statusResult, contactsResult] = await Promise.all([
+    db.query(
+      `SELECT * FROM investigator_enrichment_status WHERE investigator_id = $1`,
+      [investigatorId]
+    ),
+    db.query(
+      `SELECT *
+       FROM investigator_contacts
+       WHERE investigator_id = $1
+       ORDER BY updated_at DESC`,
+      [investigatorId]
+    ),
+  ]);
+
+  const status = statusResult.rows[0]
+    ? {
+        investigatorId: statusResult.rows[0].investigator_id,
+        status: statusResult.rows[0].status,
+        stage: statusResult.rows[0].stage ?? null,
+        failureReason: statusResult.rows[0].failure_reason ?? null,
+        contactsFound: statusResult.rows[0].contacts_found,
+        lastRunAt: statusResult.rows[0].last_run_at?.toISOString() ?? null,
+        errorMessage: statusResult.rows[0].error_message ?? null,
+        outcomeLog: statusResult.rows[0].outcome_log ?? null,
+        updatedAt: statusResult.rows[0].updated_at.toISOString(),
+      }
+    : {
+        investigatorId,
+        status: 'not_started',
+        stage: null,
+        failureReason: null,
+        contactsFound: 0,
+        lastRunAt: null,
+        errorMessage: null,
+        outcomeLog: null,
+        updatedAt: new Date().toISOString(),
+      };
+
+  const contactsAll = contactsResult.rows.map(mapContactRow);
+  const contactsVisible = contactsAll.filter(c => c.visible);
+
+  return {
+    investigatorId,
+    status,
+    contactsVisible,
+    contactsAll,
+  };
 }

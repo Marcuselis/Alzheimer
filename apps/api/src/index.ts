@@ -2610,10 +2610,13 @@ async function start() {
 
       // Mark as queued in DB
       await db.query(
-        `INSERT INTO investigator_enrichment_status (investigator_id, status, contacts_found)
-         VALUES ($1, 'queued', 0)
+        `INSERT INTO investigator_enrichment_status (investigator_id, status, stage, failure_reason, contacts_found)
+         VALUES ($1, 'queued', 'queued', NULL, 0)
          ON CONFLICT (investigator_id) DO UPDATE
-           SET status = 'queued', updated_at = NOW()`,
+           SET status = 'queued',
+               stage = 'queued',
+               failure_reason = NULL,
+               updated_at = NOW()`,
         [personId]
       );
 
@@ -2633,6 +2636,19 @@ async function start() {
       return status;
     } catch (error: any) {
       fastify.log.error({ personId, error: error.message }, 'Failed to get enrichment status');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/investigators/:personId/enrich-debug
+  // Returns raw enrichment trace + visible/hidden contacts for one investigator.
+  fastify.get('/api/investigators/:personId/enrich-debug', async (request, reply) => {
+    const { personId } = request.params as { personId: string };
+    try {
+      const { getEnrichmentDebugForInvestigator } = await import('./investigatorContacts');
+      return await getEnrichmentDebugForInvestigator(personId);
+    } catch (error: any) {
+      fastify.log.error({ personId, error: error.message }, 'Failed to get enrichment debug trace');
       return reply.code(500).send({ error: error.message });
     }
   });
@@ -2666,6 +2682,63 @@ async function start() {
       return detail;
     } catch (error: any) {
       fastify.log.error({ sponsorId, error: error.message }, 'Failed to get sponsor detail');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // ── News / Signals Endpoints ──────────────────────────────────────────────
+
+  // GET /api/news — fetch news events with filters
+  // Query params: eventTypes[], importanceLevels[], entityType, entityId, limit, offset
+  fastify.get('/api/news', async (request, reply) => {
+    try {
+      const {
+        eventTypes,
+        importanceLevels,
+        entityType,
+        entityId,
+        limit,
+        offset,
+      } = request.query as any;
+
+      const { getNewsEvents } = await import('./news');
+      const events = await getNewsEvents({
+        eventTypes: eventTypes ? (Array.isArray(eventTypes) ? eventTypes : [eventTypes]) : undefined,
+        importanceLevels: importanceLevels ? (Array.isArray(importanceLevels) ? importanceLevels : [importanceLevels]) : undefined,
+        entityType,
+        entityId,
+        limit: parseInt(limit, 10) || 50,
+        offset: parseInt(offset, 10) || 0,
+      });
+      return { events, count: events.length };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to fetch news events');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // GET /api/news/:id — fetch single news event
+  fastify.get('/api/news/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    try {
+      const { getNewsEventById } = await import('./news');
+      const event = await getNewsEventById(id);
+      if (!event) return reply.code(404).send({ error: 'News event not found' });
+      return event;
+    } catch (error: any) {
+      fastify.log.error({ id, error: error.message }, 'Failed to fetch news event');
+      return reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // POST /api/news — create a news event (admin/internal use)
+  fastify.post('/api/news', async (request, reply) => {
+    try {
+      const { createNewsEvent } = await import('./news');
+      const eventId = await createNewsEvent(request.body as any);
+      return { id: eventId, created: true };
+    } catch (error: any) {
+      fastify.log.error({ error: error.message }, 'Failed to create news event');
       return reply.code(500).send({ error: error.message });
     }
   });

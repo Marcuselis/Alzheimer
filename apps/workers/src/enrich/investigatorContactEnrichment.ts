@@ -30,7 +30,7 @@ import { verifyEmail, adjustConfidenceForVerification } from './emailVerificatio
 import { searchWeb } from '../sources/webSearch';
 import { linkedinCandidateSearch } from './linkedinCandidateSearch';
 import { profileDiscovery } from './profileDiscovery';
-import { resolveInstitution, getSearchHints } from './institutionResolver';
+import { resolveInstitution } from './institutionResolver';
 import fetch from 'node-fetch';
 
 const db = new Pool({
@@ -55,10 +55,67 @@ export type FailureReason =
   | 'low_confidence'          // adjusted confidence below threshold for all candidates
   | 'smtp_unavailable';       // SMTP probing returned unknown for all candidates
 
+type EnrichmentStage =
+  | 'queued'
+  | 'running'
+  | 'domain_resolution'
+  | 'linkedin_discovery'
+  | 'profile_discovery'
+  | 'published_email_search'
+  | 'email_verification'
+  | 'persistence'
+  | 'completed'
+  | 'failed';
+
 interface EnrichmentOutcome {
+  runId: string;
+  fullName: string;
+  institutionInput: string | null;
+  normalizedOrg: string | null;
+  domainCandidates: string[];
+  searchQueries: string[];
+  pagesFetched: Array<{
+    query: string;
+    url: string;
+    title: string | null;
+    emailsExtracted: string[];
+    fetchError?: string | null;
+  }>;
+  profilePagesFound: Array<{
+    url: string;
+    title: string;
+    score: number;
+    status: string;
+    isOfficialPage?: boolean;
+  }>;
+  publishedEmailsFound: Array<{
+    email: string;
+    sourceUrl: string;
+    sourceLabel: string;
+  }>;
+  generatedEmailCandidates: string[];
+  verificationResults: Array<{
+    email: string;
+    pattern: string;
+    status: string;
+    mxValid: boolean | null;
+    catchAll: boolean | null;
+    adjustedConfidence: number;
+    persisted: boolean;
+  }>;
+  contactsPersisted: Array<{
+    type: string;
+    value: string;
+    status: string;
+    sourceType: string;
+    confidence: number;
+    visible: boolean;
+    isPrimary: boolean;
+  }>;
+  finalDiscardReason: string | null;
   institutionRaw: string | null;
   domainResolved: string | null;
-  domainSource: 'normalized' | 'inferred' | null;
+  domainSource: 'curated' | 'normalized' | 'inferred' | null;
   webSearchAttempted: boolean;
   webSearchResultCount: number;
   pagesScraped: number;
@@ -72,8 +129,22 @@ interface EnrichmentOutcome {
   failureReasons: FailureReason[];
 }
 
-function makeOutcome(institutionRaw: string | null): EnrichmentOutcome {
+function makeOutcome(fullName: string, institutionRaw: string | null): EnrichmentOutcome {
+  const runId = `inv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   return {
+    runId,
+    fullName,
+    institutionInput: institutionRaw,
+    normalizedOrg: null,
+    domainCandidates: [],
+    searchQueries: [],
+    pagesFetched: [],
+    profilePagesFound: [],
+    publishedEmailsFound: [],
+    generatedEmailCandidates: [],
+    verificationResults: [],
+    contactsPersisted: [],
+    finalDiscardReason: null,
     institutionRaw,
     domainResolved: null,
     domainSource: null,
@@ -89,6 +160,25 @@ function makeOutcome(institutionRaw: string | null): EnrichmentOutcome {
     unknownCount: 0,
     failureReasons: [],
   };
+}
+
+function pushFailure(outcome: EnrichmentOutcome, reason: FailureReason): void {
+  if (!outcome.failureReasons.includes(reason)) {
+    outcome.failureReasons.push(reason);
+  }
+}
+
+function deriveFailureReason(outcome: EnrichmentOutcome, persistedContacts: number, errorMessage?: string): string | null {
+  if (errorMessage) return 'worker_error';
+  if (persistedContacts > 0) return null;
+  if (outcome.failureReasons.includes('profile_page_not_found')) return 'no_profile_match';
+  if (outcome.failureReasons.includes('no_domain')) return 'no_domain';
+  if (outcome.failureReasons.includes('web_search_no_results')) return 'no_search_results';
+  if (outcome.failureReasons.includes('all_smtp_rejected')) return 'all_smtp_rejected';
+  if (outcome.failureReasons.includes('all_catch_all')) return 'all_catch_all';
+  if (outcome.failureReasons.includes('low_confidence')) return 'low_confidence';
+  if (outcome.failureReasons.length > 0) return outcome.failureReasons[0];
+  return 'no_contacts_persisted';
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -195,22 +285,26 @@ async function recomputePrimaryContact(investigatorId: string): Promise<void> {
 async function setEnrichmentStatus(
   investigatorId: string,
   status: string,
+  stage: EnrichmentStage,
+  failureReason: string | null,
   contactsFound: number,
   outcome: EnrichmentOutcome,
   errorMessage?: string
 ): Promise<void> {
   await db.query(
     `INSERT INTO investigator_enrichment_status
-       (investigator_id, status, contacts_found, last_run_at, error_message, outcome_log)
-     VALUES ($1, $2, $3, NOW(), $4, $5)
+       (investigator_id, status, stage, failure_reason, contacts_found, last_run_at, error_message, outcome_log)
+     VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7)
      ON CONFLICT (investigator_id) DO UPDATE
        SET status          = EXCLUDED.status,
+           stage           = EXCLUDED.stage,
+           failure_reason  = EXCLUDED.failure_reason,
            contacts_found  = EXCLUDED.contacts_found,
            last_run_at     = NOW(),
            error_message   = EXCLUDED.error_message,
            outcome_log     = EXCLUDED.outcome_log,
            updated_at      = NOW()`,
-    [investigatorId, status, contactsFound, errorMessage ?? null, JSON.stringify(outcome)]
+    [investigatorId, status, stage, failureReason, contactsFound, errorMessage ?? null, JSON.stringify(outcome)]
   );
 }
 
@@ -235,6 +329,7 @@ async function searchForPublishedEmail(
       ];
 
   outcome.webSearchAttempted = true;
+  outcome.searchQueries.push(...queries);
 
   let anyPageLoaded = false;
   let anyEmailFound = false;
@@ -245,7 +340,7 @@ async function searchForPublishedEmail(
     try {
       results = await searchWeb(query, 3);
     } catch {
-      outcome.failureReasons.push('web_search_failed');
+      pushFailure(outcome, 'web_search_failed');
       continue;
     }
 
@@ -257,6 +352,13 @@ async function searchForPublishedEmail(
 
     for (const result of results) {
       let html = '';
+      const pageTrace = {
+        query,
+        url: result.url,
+        title: result.title ?? null,
+        emailsExtracted: [] as string[],
+        fetchError: null as string | null,
+      };
       try {
         const resp = await (fetch as any)(result.url, {
           headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -266,10 +368,14 @@ async function searchForPublishedEmail(
         anyPageLoaded = true;
         outcome.pagesScraped++;
       } catch {
+        pageTrace.fetchError = 'fetch_failed';
+        outcome.pagesFetched.push(pageTrace);
         continue;
       }
 
       const emails = extractEmailsFromText(html);
+      pageTrace.emailsExtracted = emails.slice(0, 10);
+      outcome.pagesFetched.push(pageTrace);
       if (emails.length > 0) anyEmailFound = true;
 
       // Prefer emails matching the institution domain
@@ -293,11 +399,11 @@ async function searchForPublishedEmail(
   }
 
   if (outcome.webSearchResultCount === 0) {
-    outcome.failureReasons.push('web_search_no_results');
+    pushFailure(outcome, 'web_search_no_results');
   } else if (!anyPageLoaded) {
-    outcome.failureReasons.push('no_pages_scraped');
+    pushFailure(outcome, 'no_pages_scraped');
   } else if (!anyEmailFound) {
-    outcome.failureReasons.push('no_email_on_pages');
+    pushFailure(outcome, 'no_email_on_pages');
   }
 
   return null;
@@ -307,60 +413,107 @@ async function searchForPublishedEmail(
 
 export async function enrichInvestigatorContacts(input: InvestigatorInput): Promise<void> {
   const { investigatorId, fullName, institution, country, topic } = input;
+  const traceInvestigatorId = (process.env.INVESTIGATOR_TRACE_ID || '').trim().toLowerCase();
+  const shouldDumpTrace = traceInvestigatorId !== '' && traceInvestigatorId === investigatorId.toLowerCase();
 
   console.log(`[InvEnrich] Starting: ${fullName} (${investigatorId})`);
 
-  const outcome = makeOutcome(institution);
+  const outcome = makeOutcome(fullName, institution);
+  let stage: EnrichmentStage = 'running';
 
-  // Write 'running' immediately — no outcome_log yet at this stage
+  // Write 'running' immediately with an initialized trace payload.
   await db.query(
     `INSERT INTO investigator_enrichment_status
-       (investigator_id, status, contacts_found, last_run_at)
-     VALUES ($1, 'running', 0, NOW())
+       (investigator_id, status, stage, failure_reason, contacts_found, last_run_at, error_message, outcome_log)
+     VALUES ($1, 'running', 'running', NULL, 0, NOW(), NULL, $2)
      ON CONFLICT (investigator_id) DO UPDATE
-       SET status = 'running', last_run_at = NOW(), updated_at = NOW()`,
-    [investigatorId]
+       SET status = 'running',
+           stage = 'running',
+           failure_reason = NULL,
+           error_message = NULL,
+           last_run_at = NOW(),
+           outcome_log = $2,
+           updated_at = NOW()`,
+    [investigatorId, JSON.stringify(outcome)]
   );
 
   let contactsFound = 0;
 
   try {
+    const recordPersisted = (contact: {
+      type: string;
+      value: string;
+      status: string;
+      sourceType: string;
+      confidence: number;
+      isPrimary: boolean;
+    }) => {
+      outcome.contactsPersisted.push({
+        ...contact,
+        visible: contact.status !== 'rejected',
+      });
+    };
+
     // 1. Resolve domain — try curated registry first, then fallback to heuristic
+    stage = 'domain_resolution';
     if (!institution) {
-      outcome.failureReasons.push('no_institution');
+      pushFailure(outcome, 'no_institution');
     }
 
     let domain: string | null = null;
     let searchHints: string[] = [];
+    const domainCandidates = new Set<string>();
 
     // Try curated institution resolver first (e.g., "Sunnybrook Research Institute" → "sunnybrook.ca")
     const curatedEntry = institution ? resolveInstitution(institution) : null;
     if (curatedEntry) {
-      domain = curatedEntry.primaryDomains[0];
+      domain = curatedEntry.primaryDomains[0] ?? null;
       searchHints = curatedEntry.searchHints;
+      outcome.normalizedOrg = curatedEntry.aliases[0] ?? institution;
+      for (const candidate of curatedEntry.primaryDomains) {
+        domainCandidates.add(candidate);
+      }
       outcome.domainSource = 'curated';
       console.log(`[InvEnrich] ${fullName}: Found curated entry for "${institution}" → ${domain}`);
     } else {
       // Fallback: try normalized org lookup
       const orgRecord = institution ? normalizeOrg(institution) : null;
-      domain = orgRecord?.domain ?? (institution ? inferDomainFromName(institution) : null);
+      const inferredDomain = institution ? inferDomainFromName(institution) : null;
+      if (orgRecord?.domain) domainCandidates.add(orgRecord.domain);
+      if (inferredDomain) domainCandidates.add(inferredDomain);
+      outcome.normalizedOrg = orgRecord?.canonicalName ?? institution;
+      domain = orgRecord?.domain ?? inferredDomain;
       if (domain) {
         outcome.domainSource = orgRecord?.domain ? 'normalized' : 'inferred';
         if (outcome.domainSource === 'inferred') {
-          outcome.failureReasons.push('domain_inferred_only');
+          pushFailure(outcome, 'domain_inferred_only');
         }
       }
     }
+    outcome.domainCandidates = Array.from(domainCandidates);
 
     if (domain) {
       outcome.domainResolved = domain;
       console.log(`[InvEnrich] ${fullName}: institution="${institution}", domain="${domain}" (source=${outcome.domainSource})`);
     } else if (institution) {
-      outcome.failureReasons.push('no_domain');
+      pushFailure(outcome, 'no_domain');
       console.log(`[InvEnrich] ${fullName}: Could not resolve domain for "${institution}"`);
     }
 
+    // Record top-level discovery intents so failed runs show exactly what we tried.
+    if (institution) {
+      outcome.searchQueries.push(`"${fullName}" "${institution}"`);
+    }
+    if (domain) {
+      outcome.searchQueries.push(`"${fullName}" site:${domain}`);
+    }
+    outcome.searchQueries.push(`"${fullName}" site:linkedin.com/in`);
+    if (topic) {
+      outcome.searchQueries.push(`"${fullName}" ${topic}`);
+    }
+
     // 2. Discover LinkedIn first (high recall from weak PI data)
+    stage = 'linkedin_discovery';
     const linkedinCandidates = await linkedinCandidateSearch({
       fullName,
       institution,
@@ -369,7 +522,7 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
     });
 
     if (linkedinCandidates.length === 0 || linkedinCandidates.every(c => c.status === 'rejected')) {
-      outcome.failureReasons.push('linkedin_not_found');
+      pushFailure(outcome, 'linkedin_not_found');
     }
 
     for (const c of linkedinCandidates) {
@@ -384,10 +537,19 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
         confidence: c.score,
         isPrimary: false,
       });
+      recordPersisted({
+        type: 'linkedin',
+        value: c.url,
+        status: c.status,
+        sourceType: 'linkedin',
+        confidence: c.score,
+        isPrimary: false,
+      });
       if (c.status !== 'rejected') contactsFound++;
     }
 
     // 3. Discover official profile/staff pages
+    stage = 'profile_discovery';
     const profileCandidates = await profileDiscovery({
       fullName,
       institution,
@@ -395,9 +557,16 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
       country,
       topic: topic ?? 'alzheimer neurology',
     });
+    outcome.profilePagesFound = profileCandidates.map(c => ({
+      url: c.url,
+      title: c.title || 'Profile page',
+      score: c.score,
+      status: c.status,
+      isOfficialPage: c.isOfficialPage,
+    }));
 
     if (profileCandidates.length === 0 || profileCandidates.every(c => c.status === 'rejected')) {
-      outcome.failureReasons.push('profile_page_not_found');
+      pushFailure(outcome, 'profile_page_not_found');
       if (domain) {
         // Department fallback: institution homepage/directory pointer.
         await upsertContact({
@@ -408,6 +577,14 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
           sourceType: 'institution_directory',
           sourceUrl: `https://${domain}`,
           sourceLabel: institution ? `${institution} directory` : domain,
+          confidence: 40,
+          isPrimary: false,
+        });
+        recordPersisted({
+          type: 'website',
+          value: `https://${domain}`,
+          status: 'possible',
+          sourceType: 'institution_directory',
           confidence: 40,
           isPrimary: false,
         });
@@ -426,15 +603,29 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
           confidence: c.score,
           isPrimary: false,
         });
+        recordPersisted({
+          type: 'website',
+          value: c.url,
+          status: c.status,
+          sourceType: c.isOfficialPage ? 'staff_page' : 'institution_directory',
+          confidence: c.score,
+          isPrimary: false,
+        });
         if (c.status !== 'rejected') contactsFound++;
       }
     }
 
     // 4. Attempt to find a published email via web search
     // Use curated search hints if available, otherwise fall back to heuristic queries
+    stage = 'published_email_search';
     const published = await searchForPublishedEmail(fullName, institution, domain, outcome, searchHints);
     if (published) {
       outcome.publishedEmailFound = true;
+      outcome.publishedEmailsFound.push({
+        email: published.email,
+        sourceUrl: published.sourceUrl,
+        sourceLabel: published.sourceLabel,
+      });
       await upsertContact({
         investigatorId,
         type: 'email',
@@ -446,18 +637,28 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
         confidence: 90,
         isPrimary: false,
       });
+      recordPersisted({
+        type: 'email',
+        value: published.email,
+        status: 'published',
+        sourceType: 'staff_page',
+        confidence: 90,
+        isPrimary: false,
+      });
       contactsFound++;
       console.log(`[InvEnrich] ${fullName}: found published email ${published.email}`);
     }
 
     // 5. Generate pattern-based candidates if we have a domain
+    stage = 'email_verification';
     if (domain) {
       const parsed = parseName(fullName);
       if (!parsed.firstName || !parsed.lastName) {
-        outcome.failureReasons.push('name_too_ambiguous');
+        pushFailure(outcome, 'name_too_ambiguous');
       } else {
         const candidates = generateEmailCandidates(parsed.firstName, parsed.lastName, domain);
         outcome.candidatesGenerated = candidates.length;
+        outcome.generatedEmailCandidates = candidates.map(c => c.email);
 
         let allRejected = true;
         let allCatchAll = true;
@@ -496,6 +697,23 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
               mxValid: verifyResult.mxValid,
               catchAll: verifyResult.catchAll ?? undefined,
             });
+            recordPersisted({
+              type: 'email',
+              value: email,
+              status: 'rejected',
+              sourceType: 'inference',
+              confidence: 0,
+              isPrimary: false,
+            });
+            outcome.verificationResults.push({
+              email,
+              pattern,
+              status: verifyResult.status,
+              mxValid: verifyResult.mxValid ?? null,
+              catchAll: verifyResult.catchAll ?? null,
+              adjustedConfidence: 0,
+              persisted: true,
+            });
             continue;
           }
 
@@ -516,7 +734,18 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
             adjustConfidenceForVerification(baseConfidence / 100, verifyResult.status) * 100
           );
 
-          if (adjConfidence < 20) continue; // not worth storing
+          if (adjConfidence < 20) {
+            outcome.verificationResults.push({
+              email,
+              pattern,
+              status: verifyResult.status,
+              mxValid: verifyResult.mxValid ?? null,
+              catchAll: verifyResult.catchAll ?? null,
+              adjustedConfidence: adjConfidence,
+              persisted: false,
+            });
+            continue; // not worth storing
+          }
           allLowConfidence = false;
 
           await upsertContact({
@@ -531,6 +760,23 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
             mxValid: verifyResult.mxValid,
             catchAll: verifyResult.catchAll ?? undefined,
           });
+          recordPersisted({
+            type: 'email',
+            value: email,
+            status: verifyResult.status,
+            sourceType: 'inference',
+            confidence: adjConfidence,
+            isPrimary: false,
+          });
+          outcome.verificationResults.push({
+            email,
+            pattern,
+            status: verifyResult.status,
+            mxValid: verifyResult.mxValid ?? null,
+            catchAll: verifyResult.catchAll ?? null,
+            adjustedConfidence: adjConfidence,
+            persisted: true,
+          });
           contactsFound++;
 
           console.log(`[InvEnrich] ${fullName}: ${email} → ${verifyResult.status} (${adjConfidence}%)`);
@@ -542,21 +788,22 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
         // Synthesize failure reasons from SMTP outcomes
         if (outcome.candidatesChecked > 0) {
           if (allRejected && outcome.rejectedCount === outcome.candidatesChecked) {
-            outcome.failureReasons.push('all_smtp_rejected');
+            pushFailure(outcome, 'all_smtp_rejected');
           }
           if (allCatchAll && outcome.catchAllCount > 0 && outcome.rejectedCount === 0) {
-            outcome.failureReasons.push('all_catch_all');
+            pushFailure(outcome, 'all_catch_all');
           }
           if (allLowConfidence && outcome.verifiedCount === 0 && outcome.catchAllCount === 0) {
-            outcome.failureReasons.push('low_confidence');
+            pushFailure(outcome, 'low_confidence');
           }
           if (outcome.unknownCount === outcome.candidatesChecked) {
-            outcome.failureReasons.push('smtp_unavailable');
+            pushFailure(outcome, 'smtp_unavailable');
           }
         }
       }
     }
 
+    stage = 'persistence';
     await recomputePrimaryContact(investigatorId);
     const totalVisible = await db.query(
       `SELECT COUNT(*)::int AS count FROM investigator_contacts WHERE investigator_id = $1 AND visible = TRUE`,
@@ -564,16 +811,42 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
     );
     const persistedContacts = totalVisible.rows[0]?.count ?? 0;
     const finalStatus = persistedContacts > 0 ? 'done' : 'partial';
-    await setEnrichmentStatus(investigatorId, finalStatus, persistedContacts, outcome);
+    outcome.searchQueries = [...new Set(outcome.searchQueries)];
+    outcome.finalDiscardReason = deriveFailureReason(outcome, persistedContacts);
+    stage = 'completed';
+    await setEnrichmentStatus(
+      investigatorId,
+      finalStatus,
+      stage,
+      outcome.finalDiscardReason,
+      persistedContacts,
+      outcome
+    );
 
     console.log(
       `[InvEnrich] Done: ${fullName} — ${persistedContacts} contacts` +
       (outcome.failureReasons.length ? ` | failures: ${outcome.failureReasons.join(', ')}` : '')
     );
+    if (shouldDumpTrace) {
+      console.log(`[InvEnrichTrace:${investigatorId}] ${JSON.stringify(outcome)}`);
+    }
 
   } catch (err: any) {
     console.error(`[InvEnrich] Failed: ${fullName}:`, err.message);
-    await setEnrichmentStatus(investigatorId, 'failed', contactsFound, outcome, err.message);
+    outcome.searchQueries = [...new Set(outcome.searchQueries)];
+    outcome.finalDiscardReason = deriveFailureReason(outcome, contactsFound, err.message);
+    await setEnrichmentStatus(
+      investigatorId,
+      'failed',
+      stage,
+      outcome.finalDiscardReason,
+      contactsFound,
+      outcome,
+      err.message
+    );
+    if (shouldDumpTrace) {
+      console.error(`[InvEnrichTrace:${investigatorId}] ${JSON.stringify(outcome)}`);
+    }
     throw err;
   }
 }
