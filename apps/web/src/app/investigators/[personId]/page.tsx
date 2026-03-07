@@ -139,16 +139,18 @@ function ContactsSection({
   const websites = contacts.filter(c => c.type === 'website');
   const phones = contacts.filter(c => c.type === 'phone');
 
+  // Priority: published email > verified email > matched LinkedIn > official profile > inferred email > possible website
   const bestPublishedEmail = emails.find(c => c.status === 'published') ?? null;
+  const bestVerifiedEmail = emails.find(c => c.status === 'verified') ?? null;
   const bestMatchedLinkedIn = linkedins.find(c => c.status === 'matched') ?? null;
   const bestOfficialProfile = websites.find(c => c.status === 'matched') ?? null;
-  const bestVerifiedEmail = emails.find(c => c.status === 'verified') ?? null;
   const bestInferredEmail = emails.find(c => c.status === 'inferred' || c.status === 'catch_all') ?? null;
   const bestDepartmentFallback = websites.find(c => c.status === 'possible') ?? null;
+
   const bestContact = bestPublishedEmail
+    ?? bestVerifiedEmail
     ?? bestMatchedLinkedIn
     ?? bestOfficialProfile
-    ?? bestVerifiedEmail
     ?? bestInferredEmail
     ?? bestDepartmentFallback
     ?? null;

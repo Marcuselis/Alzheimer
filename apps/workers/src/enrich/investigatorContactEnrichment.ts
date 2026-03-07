@@ -30,6 +30,7 @@ import { verifyEmail, adjustConfidenceForVerification } from './emailVerificatio
 import { searchWeb } from '../sources/webSearch';
 import { linkedinCandidateSearch } from './linkedinCandidateSearch';
 import { profileDiscovery } from './profileDiscovery';
+import { resolveInstitution, getSearchHints } from './institutionResolver';
 import fetch from 'node-fetch';
 
 const db = new Pool({
@@ -219,71 +220,81 @@ async function searchForPublishedEmail(
   fullName: string,
   institution: string | null,
   domain: string | null,
-  outcome: EnrichmentOutcome
+  outcome: EnrichmentOutcome,
+  searchHints: string[] = []
 ): Promise<{ email: string; sourceUrl: string; sourceLabel: string } | null> {
-  const query = domain
-    ? `"${fullName}" site:${domain} email`
-    : institution
-    ? `"${fullName}" "${institution}" email contact`
-    : `"${fullName}" researcher email`;
+  // Use curated search hints if available
+  const queries = searchHints.length > 0
+    ? searchHints.map(hint => `"${fullName}" ${hint} email`)
+    : [
+        domain
+          ? `"${fullName}" site:${domain} email`
+          : institution
+          ? `"${fullName}" "${institution}" email contact`
+          : `"${fullName}" researcher email`,
+      ];
 
   outcome.webSearchAttempted = true;
-
-  let results;
-  try {
-    results = await searchWeb(query, 3);
-  } catch {
-    outcome.failureReasons.push('web_search_failed');
-    return null;
-  }
-
-  outcome.webSearchResultCount = results.length;
-
-  if (results.length === 0) {
-    outcome.failureReasons.push('web_search_no_results');
-    return null;
-  }
 
   let anyPageLoaded = false;
   let anyEmailFound = false;
 
-  for (const result of results) {
-    let html = '';
+  // Try each query in sequence until we find an email
+  for (const query of queries) {
+    let results;
     try {
-      const resp = await (fetch as any)(result.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        timeout: 10000,
-      });
-      html = await resp.text();
-      anyPageLoaded = true;
-      outcome.pagesScraped++;
+      results = await searchWeb(query, 3);
     } catch {
+      outcome.failureReasons.push('web_search_failed');
       continue;
     }
 
-    const emails = extractEmailsFromText(html);
-    if (emails.length > 0) anyEmailFound = true;
+    outcome.webSearchResultCount = Math.max(outcome.webSearchResultCount, results.length);
 
-    // Prefer emails matching the institution domain
-    const domainEmails = domain ? emails.filter(e => e.endsWith(`@${domain}`)) : emails;
-    const candidates = domainEmails.length > 0 ? domainEmails : emails;
+    if (results.length === 0) {
+      continue; // Try next query
+    }
 
-    // Filter: must contain part of the last name
-    const parsed = parseName(fullName);
-    const lastPart = parsed.lastName.toLowerCase().replace(/[^a-z]/g, '');
-    const matching = candidates.filter(e => lastPart.length > 2 && e.includes(lastPart));
+    for (const result of results) {
+      let html = '';
+      try {
+        const resp = await (fetch as any)(result.url, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          timeout: 10000,
+        });
+        html = await resp.text();
+        anyPageLoaded = true;
+        outcome.pagesScraped++;
+      } catch {
+        continue;
+      }
 
-    const chosen = matching[0] ?? candidates[0];
-    if (chosen) {
-      return {
-        email: chosen,
-        sourceUrl: result.url,
-        sourceLabel: result.title ?? result.url,
-      };
+      const emails = extractEmailsFromText(html);
+      if (emails.length > 0) anyEmailFound = true;
+
+      // Prefer emails matching the institution domain
+      const domainEmails = domain ? emails.filter(e => e.endsWith(`@${domain}`)) : emails;
+      const candidates = domainEmails.length > 0 ? domainEmails : emails;
+
+      // Filter: must contain part of the last name
+      const parsed = parseName(fullName);
+      const lastPart = parsed.lastName.toLowerCase().replace(/[^a-z]/g, '');
+      const matching = candidates.filter(e => lastPart.length > 2 && e.includes(lastPart));
+
+      const chosen = matching[0] ?? candidates[0];
+      if (chosen) {
+        return {
+          email: chosen,
+          sourceUrl: result.url,
+          sourceLabel: result.title ?? result.url,
+        };
+      }
     }
   }
 
-  if (!anyPageLoaded) {
+  if (outcome.webSearchResultCount === 0) {
+    outcome.failureReasons.push('web_search_no_results');
+  } else if (!anyPageLoaded) {
     outcome.failureReasons.push('no_pages_scraped');
   } else if (!anyEmailFound) {
     outcome.failureReasons.push('no_email_on_pages');
@@ -314,25 +325,40 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
   let contactsFound = 0;
 
   try {
-    // 1. Resolve domain
+    // 1. Resolve domain — try curated registry first, then fallback to heuristic
     if (!institution) {
       outcome.failureReasons.push('no_institution');
     }
 
-    const orgRecord = institution ? normalizeOrg(institution) : null;
-    const domain = orgRecord?.domain ?? (institution ? inferDomainFromName(institution) : null);
+    let domain: string | null = null;
+    let searchHints: string[] = [];
+
+    // Try curated institution resolver first (e.g., "Sunnybrook Research Institute" → "sunnybrook.ca")
+    const curatedEntry = institution ? resolveInstitution(institution) : null;
+    if (curatedEntry) {
+      domain = curatedEntry.primaryDomains[0];
+      searchHints = curatedEntry.searchHints;
+      outcome.domainSource = 'curated';
+      console.log(`[InvEnrich] ${fullName}: Found curated entry for "${institution}" → ${domain}`);
+    } else {
+      // Fallback: try normalized org lookup
+      const orgRecord = institution ? normalizeOrg(institution) : null;
+      domain = orgRecord?.domain ?? (institution ? inferDomainFromName(institution) : null);
+      if (domain) {
+        outcome.domainSource = orgRecord?.domain ? 'normalized' : 'inferred';
+        if (outcome.domainSource === 'inferred') {
+          outcome.failureReasons.push('domain_inferred_only');
+        }
+      }
+    }
 
     if (domain) {
       outcome.domainResolved = domain;
-      outcome.domainSource = orgRecord?.domain ? 'normalized' : 'inferred';
-      if (outcome.domainSource === 'inferred') {
-        outcome.failureReasons.push('domain_inferred_only');
-      }
+      console.log(`[InvEnrich] ${fullName}: institution="${institution}", domain="${domain}" (source=${outcome.domainSource})`);
     } else if (institution) {
       outcome.failureReasons.push('no_domain');
+      console.log(`[InvEnrich] ${fullName}: Could not resolve domain for "${institution}"`);
     }
-
-    console.log(`[InvEnrich] ${fullName}: institution="${institution}", domain="${domain ?? 'unknown'}" (source=${outcome.domainSource ?? 'none'})`);
 
     // 2. Discover LinkedIn first (high recall from weak PI data)
     const linkedinCandidates = await linkedinCandidateSearch({
@@ -405,7 +431,8 @@ export async function enrichInvestigatorContacts(input: InvestigatorInput): Prom
     }
 
     // 4. Attempt to find a published email via web search
-    const published = await searchForPublishedEmail(fullName, institution, domain, outcome);
+    // Use curated search hints if available, otherwise fall back to heuristic queries
+    const published = await searchForPublishedEmail(fullName, institution, domain, outcome, searchHints);
     if (published) {
       outcome.publishedEmailFound = true;
       await upsertContact({
